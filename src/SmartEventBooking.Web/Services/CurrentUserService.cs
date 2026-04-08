@@ -5,9 +5,22 @@ namespace SmartEventBooking.Web.Services;
 
 public sealed class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICurrentUserService
 {
-    public string? UserId =>
-        httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+    public string? UserId
+    {
+        get
+        {
+            var user = httpContextAccessor.HttpContext?.User;
+            return user?.FindFirstValue(ClaimTypes.NameIdentifier);
+        }
+    }
 
-    public bool IsAuthenticated =>
-        httpContextAccessor.HttpContext?.User?.Identity?.IsAuthenticated == true;
+    public bool IsAuthenticated
+    {
+        get
+        {
+            var user = httpContextAccessor.HttpContext?.User;
+            var identity = user?.Identity;
+            return identity?.IsAuthenticated == true;
+        }
+    }
 }
