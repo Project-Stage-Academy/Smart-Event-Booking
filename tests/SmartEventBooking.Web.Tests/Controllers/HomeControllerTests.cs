@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging.Abstractions;
 using SmartEventBooking.Web.Controllers;
 using SmartEventBooking.Web.Models;
 
@@ -11,7 +12,7 @@ public class HomeControllerTests
     [Fact]
     public void Index_ReturnsViewResult()
     {
-        var controller = new HomeController();
+        var controller = new HomeController(NullLogger<HomeController>.Instance);
 
         var result = controller.Index();
 
@@ -21,7 +22,7 @@ public class HomeControllerTests
     [Fact]
     public void Privacy_ReturnsViewResult()
     {
-        var controller = new HomeController();
+        var controller = new HomeController(NullLogger<HomeController>.Instance);
 
         var result = controller.Privacy();
 
@@ -31,7 +32,7 @@ public class HomeControllerTests
     [Fact]
     public void Error_ReturnsViewWithErrorViewModel()
     {
-        var controller = new HomeController
+        var controller = new HomeController(NullLogger<HomeController>.Instance)
         {
             ControllerContext = new ControllerContext
             {
