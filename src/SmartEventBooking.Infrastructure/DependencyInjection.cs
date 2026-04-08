@@ -50,7 +50,12 @@ public static class DependencyInjection
         {
             var settings = sp.GetRequiredService<IOptions<DatabaseSettings>>();
             var connectionString = DatabaseConnectionFactory.BuildConnectionString(configuration, settings);
-            options.UseSqlServer(connectionString);
+            options.UseSqlServer(connectionString, sqlOptions =>
+            {
+                sqlOptions.EnableRetryOnFailure(maxRetryCount: 3,
+                    maxRetryDelay: TimeSpan.FromSeconds(5),
+                    errorNumbersToAdd: null);
+            });
         });
 
         return services;
