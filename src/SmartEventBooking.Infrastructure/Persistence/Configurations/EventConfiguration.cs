@@ -17,6 +17,7 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
             .HasMaxLength(200);
 
         builder.Property(e => e.Description)
+            .HasMaxLength(5000)
             .IsRequired(false);
 
         builder.Property(e => e.Banner)

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace SmartEventBooking.Infrastructure.Persistence.Repositories;
 
@@ -19,30 +20,29 @@ public class EventRepository : IEventRepository
 
     public async Task<Event?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _context.Set<Event>().FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+        return await _context.Set<Event>().FindAsync(new object[] { id }, cancellationToken);
     }
 
-    public async Task<IEnumerable<Event>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Event>> GetAllAsync(int skip, int take, CancellationToken cancellationToken = default)
     {
-        return await _context.Set<Event>().ToListAsync(cancellationToken);
+        return await _context.Set<Event>().Skip(skip).Take(take).ToListAsync(cancellationToken);
     }
 
     public async Task AddAsync(Event @event, CancellationToken cancellationToken = default)
     {
         await _context.Set<Event>().AddAsync(@event, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task UpdateAsync(Event @event, CancellationToken cancellationToken = default)
+    public Task UpdateAsync(Event @event, CancellationToken cancellationToken = default)
     {
         _context.Set<Event>().Update(@event);
-        await _context.SaveChangesAsync(cancellationToken);
+        return Task.CompletedTask;
     }
 
-    public async Task DeleteAsync(Event @event, CancellationToken cancellationToken = default)
+    public Task DeleteAsync(Event @event, CancellationToken cancellationToken = default)
     {
         _context.Set<Event>().Remove(@event);
-        await _context.SaveChangesAsync(cancellationToken);
+        return Task.CompletedTask;
     }
 
     public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default)

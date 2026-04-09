@@ -38,6 +38,7 @@ public static class DependencyInjection
         });
 
         services.AddScoped<IEventRepository, EventRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }
