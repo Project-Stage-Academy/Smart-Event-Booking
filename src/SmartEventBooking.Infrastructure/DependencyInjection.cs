@@ -16,30 +16,7 @@ public static class DependencyInjection
     {
         services
             .AddOptions<DatabaseSettings>()
-            .Bind(configuration.GetSection(DatabaseSettings.SectionName))
-            .PostConfigure(options =>
-            {
-                options.Server = GetEnvOrDefault("DB_SERVER", options.Server);
-                options.Name = GetEnvOrDefault("DB_NAME", options.Name);
-                options.User = GetEnvOrDefault("DB_USER", options.User);
-                options.Password = GetEnvOrDefault("DB_PASSWORD", options.Password);
-
-                var trustServerCertificateValue = Environment.GetEnvironmentVariable("DB_TRUST_SERVER_CERTIFICATE");
-                if (string.IsNullOrWhiteSpace(trustServerCertificateValue))
-                {
-                    return;
-                }
-
-                if (!bool.TryParse(trustServerCertificateValue, out var trustServerCertificate))
-                {
-                    throw new OptionsValidationException(
-                        nameof(DatabaseSettings),
-                        typeof(DatabaseSettings),
-                        ["DB_TRUST_SERVER_CERTIFICATE must be 'true' or 'false'."]);
-                }
-
-                options.TrustServerCertificate = trustServerCertificate;
-            })
+            .BindConfiguration(DatabaseSettings.SectionName)
             .Validate(options => !string.IsNullOrWhiteSpace(options.Server), "Database:Server is required.")
             .Validate(options => !string.IsNullOrWhiteSpace(options.Name), "Database:Name is required.")
             .Validate(options => !string.IsNullOrWhiteSpace(options.User), "Database:User is required.")
@@ -59,13 +36,5 @@ public static class DependencyInjection
         });
 
         return services;
-    }
-
-    private static string GetEnvOrDefault(string environmentVariable, string currentValue)
-    {
-        var fromEnvironment = Environment.GetEnvironmentVariable(environmentVariable);
-        return string.IsNullOrWhiteSpace(fromEnvironment)
-            ? currentValue
-            : fromEnvironment;
     }
 }
