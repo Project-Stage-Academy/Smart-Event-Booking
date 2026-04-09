@@ -1,153 +1,78 @@
-# 🎟 Smart Event Booking System
+# Smart Event Booking
 
-## 📌 Project Vision Statement (PVS)
+ASP.NET Core MVC application for event discovery and ticket booking.
 
-Smart Event Booking System is a web application designed to simplify the process of discovering, managing, and booking events such as concerts, lectures, and webinars.
+For product vision, scope, and contribution workflow, see `PROJECT_SCOPE.md`.
 
-The system enables users to easily browse events, reserve tickets, and track their booking history, while administrators can efficiently create and manage events.
+## Prerequisites
 
-The goal of the project is to provide a user-friendly, scalable, and reliable platform that demonstrates modern web development practices using ASP.NET MVC, including authentication, data management, and clean architecture principles.
+- .NET SDK 10.0
+- SQL Server (local instance or Docker)
 
----
+## 1) Configure the database settings
 
-## 🤝 Contribution Flow
+This app reads database values from environment variables (`Database__Server`, `Database__Name`, `Database__User`, `Database__Password`, `Database__TrustServerCertificate`) and falls back to `src/SmartEventBooking.Web/appsettings.json`.
 
-To ensure smooth collaboration during the internship, follow this workflow:
+Use one of these options:
 
-### 1. Branching Strategy
-- `main` – stable production-ready code
-- `develop` – integration branch
-- `feature/*` – new features
-- `bugfix/*` – bug fixes
+- Set environment variables directly in your shell.
+- Or copy `.env.example` to `.env`. The app auto-loads `.env` on startup (searches current and parent directories) and only applies values for variables not already set in the shell.
 
-### 2. Workflow Steps
-1. Pull latest changes from `develop`
-2. Create a new branch:
+Example:
+
+```bash
+cp .env.example .env
 ```
 
-git checkout -b feature/your-feature-name
+## 2) Start SQL Server (Docker option)
 
+```bash
+docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=YourStrong!Passw0rd" -p 1433:1433 --name smart-event-sql -d mcr.microsoft.com/mssql/server:2022-latest
 ```
-3. Implement your task
-4. Commit changes with meaningful messages:
+
+Important: keep `.env` and SQL Server credentials aligned. If the container is started with `MSSQL_SA_PASSWORD=YourStrong!Passw0rd`, set `Database__Password=YourStrong!Passw0rd` in `.env`.
+
+## 3) Create/update the database schema
+
+From the repository root:
+
+```bash
+dotnet restore
+dotnet ef database update --project src/SmartEventBooking.Infrastructure/SmartEventBooking.Infrastructure.csproj --startup-project src/SmartEventBooking.Web/SmartEventBooking.Web.csproj --context ApplicationDbContext
 ```
 
-feat: add event creation form
-fix: resolve booking validation issue
+## 4) Run the app
 
+```bash
+dotnet run --project src/SmartEventBooking.Web/SmartEventBooking.Web.csproj --launch-profile https
 ```
-5. Push branch to remote
-6. Create Pull Request (PR) to `develop`
-7. Request code review
-8. Fix comments if needed
-9. Merge after approval
 
-### 3. Code Requirements
-- Follow clean architecture principles
-- Use meaningful naming conventions
-- Apply validation where needed
-- Write readable and maintainable code
+Default URLs (development):
 
----
+- `https://localhost:7134`
+- `http://localhost:5270`
 
-## 📦 Project Scope
+If you run without the `https` launch profile, you may see:
 
-The project is divided into epics and user stories.
+- `Failed to determine the https port for redirect.`
 
----
+Use `--launch-profile https` (shown above), or set `ASPNETCORE_URLS` to include an HTTPS URL.
 
-### 🔹 EPIC 1: User Authentication & Authorization
+## 5) Verify connectivity
 
-**Goal:** Enable secure user registration and login.
+Health endpoint:
 
-**User Stories:**
-- As a user, I want to register an account so that I can use the system
-- As a user, I want to log in so that I can access my profile
-- As a user, I want to log out securely
-- As a system, I want to differentiate between Admin and User roles
+- `GET /health/db`
+- Example: `https://localhost:7134/health/db`
 
----
+Expected result:
 
-### 🔹 EPIC 2: Event Management (Admin)
+- `200 OK` with `{ "status": "ok", "database": "reachable" }`
+- If you get `503 Service Unavailable`, verify DB credentials and whether shell environment variables are overriding `.env` values.
 
-**Goal:** Allow admins to create and manage events.
+## Optional commands
 
-**User Stories:**
-- As an admin, I want to create a new event
-- As an admin, I want to edit event details
-- As an admin, I want to delete events
-- As an admin, I want to view all created events
-
----
-
-### 🔹 EPIC 3: Event Browsing (User)
-
-**Goal:** Allow users to explore available events.
-
-**User Stories:**
-- As a user, I want to view a list of events
-- As a user, I want to view event details
-- As a user, I want to filter or search events
-
----
-
-### 🔹 EPIC 4: Ticket Booking
-
-**Goal:** Enable users to book tickets for events.
-
-**User Stories:**
-- As a user, I want to book a ticket for an event
-- As a user, I want to see available seats or capacity
-- As a system, I want to prevent overbooking
-- As a user, I want to cancel my booking
-
----
-
-### 🔹 EPIC 5: Booking History
-
-**Goal:** Provide users with access to their booking history.
-
-**User Stories:**
-- As a user, I want to view my past bookings
-- As a user, I want to see booking details
-- As a user, I want to track my active reservations
-
----
-
-### 🔹 EPIC 6: QR Ticket Generation
-
-**Goal:** Provide a simple digital ticket.
-
-**User Stories:**
-- As a user, I want to receive a QR code after booking
-- As a system, I want to generate a unique QR per booking
-- As a user, I want to view my QR ticket
-
----
-
-## 🚀 Tech Stack (recommended)
-
-- ASP.NET MVC / ASP.NET Core
-- Entity Framework Core
-- MS SQL Server
-- ASP.NET Identity
-- Optional: JavaScript / React (frontend enhancement)
-
----
-
-## 📌 Notes
-
-- Focus on delivering a working MVP within 1 month
-- Prioritize functionality over complex UI
-- Each feature should be demo-ready
-
----
-
-## 🎯 Final Deliverable
-
-A working web application that demonstrates:
-- Authentication & authorization
-- CRUD operations
-- Booking logic
-- Clean architecture
-- Team collaboration
+```bash
+dotnet build
+dotnet test
+```

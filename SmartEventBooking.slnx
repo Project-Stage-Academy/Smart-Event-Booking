@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SmartEventBooking.Application/SmartEventBooking.Application.csproj" />
+    <Project Path="src/SmartEventBooking.Domain/SmartEventBooking.Domain.csproj" />
+    <Project Path="src/SmartEventBooking.Infrastructure/SmartEventBooking.Infrastructure.csproj" />
+    <Project Path="src/SmartEventBooking.Shared/SmartEventBooking.Shared.csproj" />
+    <Project Path="src/SmartEventBooking.Web/SmartEventBooking.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SmartEventBooking.Web.Tests/SmartEventBooking.Web.Tests.csproj" />
+  </Folder>
+</Solution>
