@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartEventBooking.Web.Models;
 
@@ -17,7 +18,7 @@ public class HomeController : Controller
     {
         return View();
     }
-
+   
     public IActionResult Privacy()
     {
         return View();
@@ -26,7 +27,6 @@ public class HomeController : Controller
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
-        // Keep errors server-side only to avoid config leaks
         var requestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
         _logger.LogError("Error occurred. RequestId: {RequestId}", requestId);
         return View(new ErrorViewModel { RequestId = null });

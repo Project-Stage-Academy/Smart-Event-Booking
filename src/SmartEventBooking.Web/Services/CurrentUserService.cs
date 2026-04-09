@@ -5,12 +5,13 @@ namespace SmartEventBooking.Web.Services;
 
 public sealed class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICurrentUserService
 {
-    public string? UserId
+    public Guid? UserId
     {
         get
         {
             var user = httpContextAccessor.HttpContext?.User;
-            return user?.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdClaim = user?.FindFirstValue(ClaimTypes.NameIdentifier);
+            return Guid.TryParse(userIdClaim, out var userId) ? userId : null;
         }
     }
 

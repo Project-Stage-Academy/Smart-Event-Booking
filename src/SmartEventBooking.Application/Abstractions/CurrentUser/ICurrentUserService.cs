@@ -2,6 +2,6 @@ namespace SmartEventBooking.Application.Abstractions.CurrentUser;
 
 public interface ICurrentUserService
 {
-    string? UserId { get; }
+    Guid? UserId { get; }
     bool IsAuthenticated { get; }
 }
