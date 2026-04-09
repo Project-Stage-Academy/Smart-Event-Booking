@@ -31,12 +31,11 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.MapStaticAssets();
 
 app.MapGet("/health/db", async (ApplicationDbContext dbContext, CancellationToken cancellationToken) =>
 {

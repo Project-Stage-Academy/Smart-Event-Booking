@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using SmartEventBooking.Application.Interfaces.Repositories;
 using SmartEventBooking.Infrastructure.Configuration;
 using SmartEventBooking.Infrastructure.Persistence;
@@ -15,43 +16,25 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.Configure<DatabaseSettings>(options =>
-        {
-            options.Server =
-                Environment.GetEnvironmentVariable("DB_SERVER")
-                ?? configuration[$"{DatabaseSettings.SectionName}:Server"]
-                ?? "localhost,1433";
-
-            options.Name =
-                Environment.GetEnvironmentVariable("DB_NAME")
-                ?? configuration[$"{DatabaseSettings.SectionName}:Name"]
-                ?? "SmartEventBookingDb";
-
-            options.User =
-                Environment.GetEnvironmentVariable("DB_USER")
-                ?? configuration[$"{DatabaseSettings.SectionName}:User"]
-                ?? "sa";
-
-            options.Password =
-                Environment.GetEnvironmentVariable("DB_PASSWORD")
-                ?? configuration[$"{DatabaseSettings.SectionName}:Password"]
-                ?? string.Empty;
-
-            var trustServerCertificateValue =
-                Environment.GetEnvironmentVariable("DB_TRUST_SERVER_CERTIFICATE")
-                ?? configuration[$"{DatabaseSettings.SectionName}:TrustServerCertificate"];
-
-            if (bool.TryParse(trustServerCertificateValue, out var trustServerCertificate))
-            {
-                options.TrustServerCertificate = trustServerCertificate;
-            }
-        });
+        services
+            .AddOptions<DatabaseSettings>()
+            .BindConfiguration(DatabaseSettings.SectionName)
+            .Validate(options => !string.IsNullOrWhiteSpace(options.Server), "Database:Server is required.")
+            .Validate(options => !string.IsNullOrWhiteSpace(options.Name), "Database:Name is required.")
+            .Validate(options => !string.IsNullOrWhiteSpace(options.User), "Database:User is required.")
+            .Validate(options => !string.IsNullOrWhiteSpace(options.Password), "Database:Password is required.")
+            .ValidateOnStart();
 
         services.AddDbContext<ApplicationDbContext>((sp, options) =>
         {
-            var settings = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<DatabaseSettings>>();
+            var settings = sp.GetRequiredService<IOptions<DatabaseSettings>>();
             var connectionString = DatabaseConnectionFactory.BuildConnectionString(configuration, settings);
-            options.UseSqlServer(connectionString);
+            options.UseSqlServer(connectionString, sqlOptions =>
+            {
+                sqlOptions.EnableRetryOnFailure(maxRetryCount: 3,
+                    maxRetryDelay: TimeSpan.FromSeconds(5),
+                    errorNumbersToAdd: null);
+            });
         });
 
         services.AddScoped<IEventRepository, EventRepository>();

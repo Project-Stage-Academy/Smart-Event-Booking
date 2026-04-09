@@ -11,7 +11,7 @@ For product vision, scope, and contribution workflow, see `PROJECT_SCOPE.md`.
 
 ## 1) Configure the database settings
 
-This app reads database values from environment variables (`DB_SERVER`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_TRUST_SERVER_CERTIFICATE`) and falls back to `src/SmartEventBooking.Web/appsettings.json`.
+This app reads database values from environment variables (`Database__Server`, `Database__Name`, `Database__User`, `Database__Password`, `Database__TrustServerCertificate`) and falls back to `src/SmartEventBooking.Web/appsettings.json`.
 
 Use one of these options:
 
@@ -30,7 +30,7 @@ cp .env.example .env
 docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=YourStrong!Passw0rd" -p 1433:1433 --name smart-event-sql -d mcr.microsoft.com/mssql/server:2022-latest
 ```
 
-Important: keep `.env` and SQL Server credentials aligned. If the container is started with `MSSQL_SA_PASSWORD=YourStrong!Passw0rd`, set `DB_PASSWORD=YourStrong!Passw0rd` in `.env`.
+Important: keep `.env` and SQL Server credentials aligned. If the container is started with `MSSQL_SA_PASSWORD=YourStrong!Passw0rd`, set `Database__Password=YourStrong!Passw0rd` in `.env`.
 
 ## 3) Create/update the database schema
 
