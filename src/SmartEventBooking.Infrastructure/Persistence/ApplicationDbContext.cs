@@ -11,6 +11,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     : IdentityDbContext<ApplicationUser, IdentityRole, string>(options)
 {
     public DbSet<Event> Events { get; set; }
+    public DbSet<Venue> Venues { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

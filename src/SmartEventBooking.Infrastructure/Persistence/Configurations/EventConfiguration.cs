@@ -9,6 +9,7 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
     public void Configure(EntityTypeBuilder<Event> builder)
     {
         builder.ToTable("Events", t => t.HasCheckConstraint("CK_Event_AvailableSeats", "AvailableSeats >= 0"));
+        builder.ToTable("Events", t => t.HasCheckConstraint("CK_Event_TotalCapacity", "TotalCapacity > 0"));
 
         builder.HasKey(e => e.Id);
 
@@ -50,8 +51,10 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
         builder.Property(e => e.RowVersion)
             .IsRowVersion();
 
-        builder.Property(e => e.VenueId)
-            .IsRequired();
+        builder.HasOne(e => e.Venue)
+            .WithMany()
+            .HasForeignKey(e => e.VenueId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(e => e.Title);
         builder.HasIndex(e => e.StartDateTime);

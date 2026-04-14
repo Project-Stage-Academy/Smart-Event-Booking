@@ -25,7 +25,7 @@ public class EventRepository : IEventRepository
 
     public async Task<IEnumerable<Event>> GetAllAsync(int skip, int take, CancellationToken cancellationToken = default)
     {
-        return await _context.Set<Event>().Skip(skip).Take(take).ToListAsync(cancellationToken);
+        return await _context.Set<Event>().OrderBy(e => e.Id).Skip(skip).Take(take).ToListAsync(cancellationToken);
     }
 
     public async Task AddAsync(Event @event, CancellationToken cancellationToken = default)

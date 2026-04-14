@@ -73,8 +73,13 @@ public class Event
 
     public void UpdateCapacity(int totalCapacity, int availableSeats)
     {
+        if (totalCapacity <= 0)
+            throw new ArgumentException("Capacity must be greater than zero.", nameof(totalCapacity));
+        if (availableSeats < 0)
+            throw new ArgumentException("Available seats cannot be negative.", nameof(availableSeats));
         if (availableSeats > totalCapacity)
-            throw new InvalidOperationException("Available seats cannot exceed total capacity");
+            throw new InvalidOperationException("Available seats cannot exceed total capacity.");
+  
             
         TotalCapacity = totalCapacity;
         AvailableSeats = availableSeats;
