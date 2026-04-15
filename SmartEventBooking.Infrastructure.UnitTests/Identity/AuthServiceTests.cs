@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using SmartEventBooking.Domain.Entities;
 using SmartEventBooking.Shared.Constants;
 using SmartEventBooking.Application.Abstractions.Repositories;
+using SmartEventBooking.Infrastructure.UnitTests.Helpers;
 
 namespace SmartEventBooking.Infrastructure.UnitTests.Identity;
 
