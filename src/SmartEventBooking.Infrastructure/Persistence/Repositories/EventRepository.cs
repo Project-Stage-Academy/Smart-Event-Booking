@@ -15,33 +15,31 @@ public class EventRepository : IEventRepository
 
     public async Task<Event?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _context.Set<Event>().FindAsync(new object[] { id }, cancellationToken);
+        return await _context.Events.FindAsync(new object[] { id }, cancellationToken);
     }
 
     public async Task<IEnumerable<Event>> GetAllAsync(int skip, int take, CancellationToken cancellationToken = default)
     {
-        return await _context.Set<Event>().OrderBy(e => e.Id).Skip(skip).Take(take).ToListAsync(cancellationToken);
+        return await _context.Events.OrderBy(e => e.Id).Skip(skip).Take(take).ToListAsync(cancellationToken);
     }
 
-    public async Task AddAsync(Event @event, CancellationToken cancellationToken = default)
+    public void Add(Event @event)
     {
-        await _context.Set<Event>().AddAsync(@event, cancellationToken);
+        _context.Events.Add(@event);
     }
 
-    public Task UpdateAsync(Event @event, CancellationToken cancellationToken = default)
+    public void Update(Event @event)
     {
-        _context.Set<Event>().Update(@event);
-        return Task.CompletedTask;
+        _context.Events.Update(@event);
     }
 
-    public Task DeleteAsync(Event @event, CancellationToken cancellationToken = default)
+    public void Delete(Event @event)
     {
-        _context.Set<Event>().Remove(@event);
-        return Task.CompletedTask;
+        _context.Events.Remove(@event);
     }
 
     public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _context.Set<Event>().AnyAsync(e => e.Id == id, cancellationToken);
+        return await _context.Events.AnyAsync(e => e.Id == id, cancellationToken);
     }
 }

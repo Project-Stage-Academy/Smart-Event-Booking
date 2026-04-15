@@ -6,30 +6,30 @@ namespace SmartEventBooking.Infrastructure.Persistence.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private ApplicationDbContext _dbContext;
+        private ApplicationDbContext _context;
 
-        public UserRepository(ApplicationDbContext dbContext)
+        public UserRepository(ApplicationDbContext context)
         {
-            _dbContext = dbContext;
+            _context = context;
         }
 
         public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            return await _dbContext.DomainUsers.FindAsync(new object[] { id }, cancellationToken);
+            return await _context.DomainUsers.FindAsync(new object[] { id }, cancellationToken);
         }
         public void Add(User user)
         {
-            _dbContext.DomainUsers.Add(user);
+            _context.DomainUsers.Add(user);
         }
 
         public void Update(User user)
         {
-            _dbContext.DomainUsers.Update(user);
+            _context.DomainUsers.Update(user);
         }
 
         public void Delete(User user)
         {
-            _dbContext.DomainUsers.Remove(user);
+            _context.DomainUsers.Remove(user);
         }
 
     }
