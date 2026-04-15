@@ -2,8 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using SmartEventBooking.Application.Interfaces.Repositories;
 using SmartEventBooking.Infrastructure.Configuration;
 using SmartEventBooking.Infrastructure.Persistence;
+using SmartEventBooking.Infrastructure.Persistence.Repositories;
 using SmartEventBooking.Shared.Configuration;
 
 namespace SmartEventBooking.Infrastructure;
@@ -34,6 +36,9 @@ public static class DependencyInjection
                     errorNumbersToAdd: null);
             });
         });
+
+        services.AddScoped<IEventRepository, EventRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }

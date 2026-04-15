@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SmartEventBooking.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using SmartEventBooking.Infrastructure.Persistence;
 namespace SmartEventBooking.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260408172920_AddEventEntity")]
+    partial class AddEventEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -169,7 +172,6 @@ namespace SmartEventBooking.Infrastructure.Persistence.Migrations
                         .HasColumnType("varchar(200)");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(5000)
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("EndDateTime")
@@ -215,34 +217,7 @@ namespace SmartEventBooking.Infrastructure.Persistence.Migrations
                     b.ToTable("Events", null, t =>
                         {
                             t.HasCheckConstraint("CK_Event_AvailableSeats", "AvailableSeats >= 0");
-
-                            t.HasCheckConstraint("CK_Event_TotalCapacity", "TotalCapacity > 0");
                         });
-                });
-
-            modelBuilder.Entity("SmartEventBooking.Domain.Entities.Venue", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Capacity")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Location")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Venues");
                 });
 
             modelBuilder.Entity("SmartEventBooking.Infrastructure.Identity.ApplicationUser", b =>
@@ -359,17 +334,6 @@ namespace SmartEventBooking.Infrastructure.Persistence.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("SmartEventBooking.Domain.Entities.Event", b =>
-                {
-                    b.HasOne("SmartEventBooking.Domain.Entities.Venue", "Venue")
-                        .WithMany()
-                        .HasForeignKey("VenueId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Venue");
                 });
 #pragma warning restore 612, 618
         }
