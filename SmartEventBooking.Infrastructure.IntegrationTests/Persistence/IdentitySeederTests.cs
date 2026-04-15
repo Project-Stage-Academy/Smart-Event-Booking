@@ -4,10 +4,10 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SmartEventBooking.Application.Abstractions.Data;
-using SmartEventBooking.Domain.Repositories;
+using SmartEventBooking.Application.Abstractions.Repositories;
 using SmartEventBooking.Infrastructure.Identity;
 using SmartEventBooking.Infrastructure.Persistence;
-using SmartEventBooking.Infrastructure.Repositories;
+using SmartEventBooking.Infrastructure.Persistence.Repositories;
 using SmartEventBooking.Shared.Configuration;
 using SmartEventBooking.Shared.Constants;
 

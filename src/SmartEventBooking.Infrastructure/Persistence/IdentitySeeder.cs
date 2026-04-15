@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using SmartEventBooking.Application.Abstractions.Data;
+using SmartEventBooking.Application.Abstractions.Repositories;
 using SmartEventBooking.Domain.Entities;
-using SmartEventBooking.Domain.Repositories;
 using SmartEventBooking.Infrastructure.Identity;
 using SmartEventBooking.Shared.Configuration;
 using SmartEventBooking.Shared.Constants;

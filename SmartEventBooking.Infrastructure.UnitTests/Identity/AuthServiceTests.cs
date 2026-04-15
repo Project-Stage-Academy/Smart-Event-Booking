@@ -2,11 +2,10 @@
 using FluentAssertions;
 using SmartEventBooking.Infrastructure.Identity;
 using SmartEventBooking.Application.DTOs.Auth;
-using SmartEventBooking.Domain.Repositories;
 using Microsoft.AspNetCore.Identity;
-using SmartEventBooking.Application.Abstractions.Data;
 using SmartEventBooking.Domain.Entities;
 using SmartEventBooking.Shared.Constants;
+using SmartEventBooking.Application.Abstractions.Repositories;
 
 public class AuthServiceTests
 {

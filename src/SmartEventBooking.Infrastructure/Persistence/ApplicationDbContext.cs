@@ -1,16 +1,17 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using SmartEventBooking.Application.Abstractions.Data;
 using SmartEventBooking.Domain.Entities;
 using SmartEventBooking.Infrastructure.Identity;
 
 namespace SmartEventBooking.Infrastructure.Persistence;
 
 public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-    : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>(options), IUnitOfWork
+    : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>(options)
 {
     public DbSet<User> DomainUsers { get; set; }
+    public DbSet<Event> Events { get; set; }
+    public DbSet<Venue> Venues { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

@@ -4,11 +4,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using SmartEventBooking.Application.Abstractions.Data;
 using SmartEventBooking.Application.Abstractions.Identity;
-using SmartEventBooking.Domain.Repositories;
+using SmartEventBooking.Application.Abstractions.Repositories;
 using SmartEventBooking.Infrastructure.Configuration;
 using SmartEventBooking.Infrastructure.Identity;
 using SmartEventBooking.Infrastructure.Persistence;
-using SmartEventBooking.Infrastructure.Repositories;
+using SmartEventBooking.Infrastructure.Persistence.Repositories;
 using SmartEventBooking.Shared.Configuration;
 
 namespace SmartEventBooking.Infrastructure;
@@ -42,12 +42,14 @@ public static class DependencyInjection
             });
         });
 
-        services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ApplicationDbContext>());
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IEventRepository, EventRepository>();
 
         services.AddScoped<IAuthService, AuthService>();
         
         services.AddScoped<IDatabaseSeeder, IdentitySeeder>();
+
 
         return services;
     }

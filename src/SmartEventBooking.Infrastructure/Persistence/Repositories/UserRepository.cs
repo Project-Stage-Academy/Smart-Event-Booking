@@ -1,8 +1,8 @@
-﻿using SmartEventBooking.Domain.Entities;
-using SmartEventBooking.Domain.Repositories;
+﻿using SmartEventBooking.Application.Abstractions.Repositories;
+using SmartEventBooking.Domain.Entities;
 using SmartEventBooking.Infrastructure.Persistence;
 
-namespace SmartEventBooking.Infrastructure.Repositories
+namespace SmartEventBooking.Infrastructure.Persistence.Repositories
 {
     public class UserRepository : IUserRepository
     {

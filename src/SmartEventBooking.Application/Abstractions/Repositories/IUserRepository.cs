@@ -1,9 +1,6 @@
 ﻿using SmartEventBooking.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace SmartEventBooking.Domain.Repositories
+namespace SmartEventBooking.Application.Abstractions.Repositories
 {
     public interface IUserRepository
     {
