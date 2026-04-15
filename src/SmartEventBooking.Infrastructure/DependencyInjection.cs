@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -52,5 +53,16 @@ public static class DependencyInjection
 
 
         return services;
+    }
+
+    public static async Task InitialiseDatabaseAsync(this WebApplication app)
+    {
+        using var scope = app.Services.CreateScope();
+
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await dbContext.Database.MigrateAsync();
+
+        var seeder = scope.ServiceProvider.GetRequiredService<IDatabaseSeeder>();
+        await seeder.SeedAsync();
     }
 }

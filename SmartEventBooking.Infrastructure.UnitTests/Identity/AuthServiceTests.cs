@@ -7,6 +7,8 @@ using SmartEventBooking.Domain.Entities;
 using SmartEventBooking.Shared.Constants;
 using SmartEventBooking.Application.Abstractions.Repositories;
 
+namespace SmartEventBooking.Infrastructure.UnitTests.Identity;
+
 public class AuthServiceTests
 {
     private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;

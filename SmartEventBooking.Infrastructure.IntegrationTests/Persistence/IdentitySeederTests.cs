@@ -118,7 +118,7 @@ public class IdentitySeederTests
             .AddDefaultTokenProviders();
 
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ApplicationDbContext>());
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IDatabaseSeeder, IdentitySeeder>();
 
         return services.BuildServiceProvider(validateScopes: true);

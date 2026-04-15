@@ -91,8 +91,24 @@ namespace SmartEventBooking.Infrastructure.Persistence
                     LastName = "Administrator"
                 };
 
-                _userRepository.Add(domainAdmin);
-                await _unitOfWork.SaveChangesAsync();
+                try
+                {
+                    _userRepository.Add(domainAdmin);
+                    await _unitOfWork.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    var deleteAdminResult = await _userManager.DeleteAsync(appAdmin);
+                    if (!deleteAdminResult.Succeeded)
+                    {
+                        throw new InvalidOperationException(
+                            $"Failed to persist domain admin user for '{adminEmail}', and cleanup of the Identity user also failed: {string.Join(", ", deleteAdminResult.Errors.Select(e => e.Description))}",
+                            ex);
+                    }
+                    throw new InvalidOperationException(
+                        $"Failed to persist domain admin user for '{adminEmail}'. The created Identity user was deleted to avoid a partially-seeded state.",
+                        ex);
+                }
             }
         }
     }

@@ -67,15 +67,22 @@ namespace SmartEventBooking.Infrastructure.Identity
                 };
             }
 
-            var domainUser = new User
+            try
             {
-                Id = appUser.Id,
-                FirstName = dto.FirstName,
-                LastName = dto.LastName
-            };
-
-            _userRepository.Add(domainUser);
-            await _unitOfWork.SaveChangesAsync();
+                var domainUser = new User
+                {
+                    Id = appUser.Id,
+                    FirstName = dto.FirstName,
+                    LastName = dto.LastName
+                };
+                _userRepository.Add(domainUser);
+                await _unitOfWork.SaveChangesAsync();
+            }
+            catch
+            {
+                await _userManager.DeleteAsync(appUser);
+                throw;
+            }
 
             return new AuthResultDto { Succeeded = true };
         }

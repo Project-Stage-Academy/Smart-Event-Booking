@@ -2,7 +2,6 @@ using DotNetEnv;
 using Microsoft.AspNetCore.Identity;
 using SmartEventBooking.Application;
 using SmartEventBooking.Application.Abstractions.CurrentUser;
-using SmartEventBooking.Application.Abstractions.Data;
 using SmartEventBooking.Infrastructure;
 using SmartEventBooking.Infrastructure.Identity;
 using SmartEventBooking.Infrastructure.Persistence;
@@ -35,11 +34,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var seeder = scope.ServiceProvider.GetRequiredService<IDatabaseSeeder>();
-    await seeder.SeedAsync();
-}
+await app.InitialiseDatabaseAsync();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

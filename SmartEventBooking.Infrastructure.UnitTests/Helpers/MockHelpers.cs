@@ -5,6 +5,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authentication;
 using Moq;
 
+namespace SmartEventBooking.Infrastructure.UnitTests.Helpers;
+
 public static class MockHelpers
 {
     public static Mock<UserManager<TUser>> MockUserManager<TUser>() where TUser : class
