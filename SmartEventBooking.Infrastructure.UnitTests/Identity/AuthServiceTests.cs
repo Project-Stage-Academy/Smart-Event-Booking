@@ -1,4 +1,4 @@
-﻿using Moq;
+using Moq;
 using FluentAssertions;
 using SmartEventBooking.Infrastructure.Identity;
 using SmartEventBooking.Application.DTOs.Auth;
@@ -7,6 +7,7 @@ using SmartEventBooking.Domain.Entities;
 using SmartEventBooking.Shared.Constants;
 using SmartEventBooking.Application.Abstractions.Repositories;
 using SmartEventBooking.Infrastructure.UnitTests.Helpers;
+using Microsoft.AspNetCore.Http;
 
 namespace SmartEventBooking.Infrastructure.UnitTests.Identity;
 
@@ -53,10 +54,11 @@ public class AuthServiceTests
         _userManagerMock.Verify(x => x.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);
         _userRepositoryMock.Verify(x => x.Add(It.IsAny<User>()), Times.Never);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Never);
+        _signInManagerMock.Verify(x => x.SignInAsync(It.IsAny<ApplicationUser>(), It.IsAny<bool>(), It.IsAny<string>()), Times.Never);
     }
 
     [Fact]
-    public async Task RegisterAsync_ShouldReturnSuccess_WhenIdentitySucceeds()
+    public async Task RegisterAsync_ShouldReturnSuccessAndSignIn_WhenIdentitySucceeds()
     {
         var dto = new RegisterDto
         {
@@ -82,6 +84,9 @@ public class AuthServiceTests
 
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(default)).ReturnsAsync(1);
 
+        _signInManagerMock.Setup(x => x.SignInAsync(It.IsAny<ApplicationUser>(), It.IsAny<bool>(), It.IsAny<string>()))
+            .Returns(Task.CompletedTask);
+
         var result = await _authService.RegisterAsync(dto);
 
         result.Succeeded.Should().BeTrue();
@@ -99,6 +104,7 @@ public class AuthServiceTests
 
         _userRepositoryMock.Verify(x => x.Add(It.IsAny<User>()), Times.Once);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Once);
+        _signInManagerMock.Verify(x => x.SignInAsync(createdUser, false, null), Times.Once);
     }
 
     [Fact]
@@ -132,6 +138,7 @@ public class AuthServiceTests
         _userManagerMock.Verify(x => x.DeleteAsync(It.IsAny<ApplicationUser>()), Times.Once);
         _userRepositoryMock.Verify(x => x.Add(It.IsAny<User>()), Times.Never);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Never);
+        _signInManagerMock.Verify(x => x.SignInAsync(It.IsAny<ApplicationUser>(), It.IsAny<bool>(), It.IsAny<string>()), Times.Never);
     }
 
     [Fact]
@@ -159,55 +166,6 @@ public class AuthServiceTests
         _userManagerMock.Verify(x => x.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);
         _userRepositoryMock.Verify(x => x.Add(It.IsAny<User>()), Times.Never);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(default), Times.Never);
-    }
-
-    [Fact]
-    public async Task LoginAsync_ShouldReturnSuccess_WhenPasswordSignInSucceeds()
-    {
-        var dto = new LoginDto
-        {
-            Email = "test@test.com",
-            Password = "Password123!",
-            RememberMe = true
-        };
-
-        _signInManagerMock
-            .Setup(x => x.PasswordSignInAsync(dto.Email, dto.Password, dto.RememberMe, false))
-            .ReturnsAsync(SignInResult.Success);
-
-        var result = await _authService.LoginAsync(dto);
-
-        result.Succeeded.Should().BeTrue();
-        result.Errors.Should().BeEmpty();
-    }
-
-    [Fact]
-    public async Task LoginAsync_ShouldReturnInvalidCredentials_WhenPasswordSignInFails()
-    {
-        var dto = new LoginDto
-        {
-            Email = "test@test.com",
-            Password = "WrongPassword!",
-            RememberMe = false
-        };
-
-        _signInManagerMock
-            .Setup(x => x.PasswordSignInAsync(dto.Email, dto.Password, dto.RememberMe, false))
-            .ReturnsAsync(SignInResult.Failed);
-
-        var result = await _authService.LoginAsync(dto);
-
-        result.Succeeded.Should().BeFalse();
-        result.Errors.Should().ContainSingle().Which.Should().Be("Invalid email or password.");
-    }
-
-    [Fact]
-    public async Task LogoutAsync_ShouldCallSignOutOnce()
-    {
-        _signInManagerMock.Setup(x => x.SignOutAsync()).Returns(Task.CompletedTask);
-
-        await _authService.LogoutAsync();
-
-        _signInManagerMock.Verify(x => x.SignOutAsync(), Times.Once);
+        _signInManagerMock.Verify(x => x.SignInAsync(It.IsAny<ApplicationUser>(), It.IsAny<bool>(), It.IsAny<string>()), Times.Never);
     }
 }

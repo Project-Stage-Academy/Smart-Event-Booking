@@ -24,8 +24,7 @@ builder.Services
 // ------- Left here on purpose, waiting for AuthController implementation
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = "/Auth/Login";
-    options.LogoutPath = "/Auth/Logout";
+    options.LoginPath = "/Auth/Register";
     options.AccessDeniedPath = "/Auth/AccessDenied";
 
     options.Cookie.Name = "SmartEventBooking.Auth";

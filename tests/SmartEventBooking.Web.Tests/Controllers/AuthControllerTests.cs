@@ -54,7 +54,7 @@ namespace SmartEventBooking.Web.Tests.Controllers
         }
 
         [Fact]
-        public async Task Register_Post_RedirectsToLogin_WhenRegistrationSucceeds()
+        public async Task Register_Post_RedirectsToHome_WhenRegistrationSucceeds()
         {
             var dto = new RegisterDto
             {
@@ -71,7 +71,8 @@ namespace SmartEventBooking.Web.Tests.Controllers
 
             result.Should().BeOfType<RedirectToActionResult>();
             var redirectResult = result as RedirectToActionResult;
-            redirectResult?.ActionName.Should().Be("Login");
+            redirectResult?.ActionName.Should().Be("Index");
+            redirectResult?.ControllerName.Should().Be("Home");
         }
 
         [Fact]

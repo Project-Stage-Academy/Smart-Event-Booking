@@ -37,38 +37,40 @@ namespace SmartEventBooking.Infrastructure.Identity
                 };
             }
 
-            var appUser = new ApplicationUser
-            {
-                Id = Guid.NewGuid(),
-                UserName = dto.Email,
-                Email = dto.Email
-            };
-
-            var result = await _userManager.CreateAsync(appUser, dto.Password);
-
-            if (!result.Succeeded)
-            {
-                return new AuthResultDto
-                {
-                    Succeeded = false,
-                    Errors = result.Errors.Select(e => e.Description)
-                };
-            }
-
-            var addToRoleResult = await _userManager.AddToRoleAsync(appUser, RoleConstants.User);
-            if (!addToRoleResult.Succeeded)
-            {
-                await _userManager.DeleteAsync(appUser);
-
-                return new AuthResultDto
-                {
-                    Succeeded = false,
-                    Errors = addToRoleResult.Errors.Select(e => e.Description)
-                };
-            }
+            await _unitOfWork.BeginTransactionAsync();
 
             try
             {
+                var appUser = new ApplicationUser
+                {
+                    Id = Guid.NewGuid(),
+                    UserName = dto.Email,
+                    Email = dto.Email
+                };
+
+                var result = await _userManager.CreateAsync(appUser, dto.Password);
+
+                if (!result.Succeeded)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return new AuthResultDto
+                    {
+                        Succeeded = false,
+                        Errors = result.Errors.Select(e => e.Description)
+                    };
+                }
+
+                var addToRoleResult = await _userManager.AddToRoleAsync(appUser, RoleConstants.User);
+                if (!addToRoleResult.Succeeded)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return new AuthResultDto
+                    {
+                        Succeeded = false,
+                        Errors = addToRoleResult.Errors.Select(e => e.Description)
+                    };
+                }
+
                 var domainUser = new User
                 {
                     Id = appUser.Id,
@@ -76,40 +78,19 @@ namespace SmartEventBooking.Infrastructure.Identity
                     LastName = dto.LastName
                 };
                 _userRepository.Add(domainUser);
-                await _unitOfWork.SaveChangesAsync();
+                
+                await _unitOfWork.CommitTransactionAsync();
+                
+                // Sign-in after successful registration and commit
+                await _signInManager.SignInAsync(appUser, isPersistent: false);
             }
             catch
             {
-                await _userManager.DeleteAsync(appUser);
+                await _unitOfWork.RollbackTransactionAsync();
                 throw;
             }
 
             return new AuthResultDto { Succeeded = true };
-        }
-
-        public async Task<AuthResultDto> LoginAsync(LoginDto dto)
-        {
-            var result = await _signInManager.PasswordSignInAsync(
-                dto.Email,
-                dto.Password,
-                dto.RememberMe,
-                lockoutOnFailure: false);
-
-            if (result.Succeeded)
-            {
-                return new AuthResultDto { Succeeded = true };
-            }
-
-            return new AuthResultDto
-            {
-                Succeeded = false,
-                Errors = new[] { "Invalid email or password." }
-            };
-        }
-
-        public async Task LogoutAsync()
-        {
-            await _signInManager.SignOutAsync();
         }
     }
 }
