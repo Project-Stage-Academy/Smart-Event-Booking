@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using SmartEventBooking.Application.Abstractions.Identity;
 using SmartEventBooking.Application.Abstractions.Repositories;
 using SmartEventBooking.Application.DTOs.Auth;
@@ -13,23 +14,29 @@ namespace SmartEventBooking.Infrastructure.Identity
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<AuthService> _logger;
 
         public AuthService(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IUserRepository userRepository,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            ILogger<AuthService> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _userRepository = userRepository;
             _unitOfWork = unitOfWork;
+            _logger = logger;
         }
 
         public async Task<AuthResultDto> RegisterAsync(RegisterDto dto)
         {
+            _logger.LogInformation("Starting registration for user {Email}", dto.Email);
+
             if (dto.Password != dto.ConfirmPassword)
             {
+                _logger.LogWarning("Registration failed for {Email}: Passwords mismatch", dto.Email);
                 return new AuthResultDto 
                 { 
                     Succeeded = false, 
@@ -52,6 +59,9 @@ namespace SmartEventBooking.Infrastructure.Identity
 
                 if (!result.Succeeded)
                 {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogWarning("Identity user creation failed for {Email}: {Errors}", dto.Email, errors);
+                    
                     await _unitOfWork.RollbackTransactionAsync();
                     return new AuthResultDto
                     {
@@ -63,6 +73,9 @@ namespace SmartEventBooking.Infrastructure.Identity
                 var addToRoleResult = await _userManager.AddToRoleAsync(appUser, RoleConstants.User);
                 if (!addToRoleResult.Succeeded)
                 {
+                    var errors = string.Join(", ", addToRoleResult.Errors.Select(e => e.Description));
+                    _logger.LogWarning("Adding user {Email} to role failed: {Errors}", dto.Email, errors);
+
                     await _unitOfWork.RollbackTransactionAsync();
                     return new AuthResultDto
                     {
@@ -83,9 +96,12 @@ namespace SmartEventBooking.Infrastructure.Identity
                 
                 // Sign-in after successful registration and commit
                 await _signInManager.SignInAsync(appUser, isPersistent: false);
+                
+                _logger.LogInformation("User {Email} registered successfully", dto.Email);
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "An error occurred during registration for user {Email}", dto.Email);
                 await _unitOfWork.RollbackTransactionAsync();
                 throw;
             }
