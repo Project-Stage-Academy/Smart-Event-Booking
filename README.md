@@ -13,6 +13,11 @@ For product vision, scope, and contribution workflow, see `PROJECT_SCOPE.md`.
 
 This app reads database values from environment variables (`Database__Server`, `Database__Name`, `Database__User`, `Database__Password`, `Database__TrustServerCertificate`) and falls back to `src/SmartEventBooking.Web/appsettings.json`.
 
+Admin seeding credentials are also read from environment variables:
+
+- `AdminSettings__Email`
+- `AdminSettings__Password`
+
 Use one of these options:
 
 - Set environment variables directly in your shell.

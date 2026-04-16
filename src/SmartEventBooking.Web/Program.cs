@@ -1,6 +1,6 @@
 using DotNetEnv;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+using SmartEventBooking.Application;
 using SmartEventBooking.Application.Abstractions.CurrentUser;
 using SmartEventBooking.Infrastructure;
 using SmartEventBooking.Infrastructure.Identity;
@@ -15,12 +15,26 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddApplicationServices();
 builder.Services
-    .AddIdentity<ApplicationUser, IdentityRole>()
+    .AddIdentity<ApplicationUser, IdentityRole<Guid>>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
+// ------- Left here on purpose, waiting for AuthController implementation
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Auth/Login";
+    options.LogoutPath = "/Auth/Logout";
+    options.AccessDeniedPath = "/Auth/AccessDenied";
+
+    options.Cookie.Name = "SmartEventBooking.Auth";
+    options.ExpireTimeSpan = TimeSpan.FromDays(7);
+});
+
 var app = builder.Build();
+
+await app.InitialiseDatabaseAsync();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

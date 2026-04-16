@@ -1,6 +1,4 @@
-using System.Threading;
-using System.Threading.Tasks;
-using SmartEventBooking.Application.Interfaces.Repositories;
+using SmartEventBooking.Application.Abstractions.Repositories;
 
 namespace SmartEventBooking.Infrastructure.Persistence.Repositories;
 

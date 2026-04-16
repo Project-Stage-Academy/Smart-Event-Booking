@@ -1,9 +1,13 @@
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using SmartEventBooking.Application.Interfaces.Repositories;
+using SmartEventBooking.Application.Abstractions.Data;
+using SmartEventBooking.Application.Abstractions.Identity;
+using SmartEventBooking.Application.Abstractions.Repositories;
 using SmartEventBooking.Infrastructure.Configuration;
+using SmartEventBooking.Infrastructure.Identity;
 using SmartEventBooking.Infrastructure.Persistence;
 using SmartEventBooking.Infrastructure.Persistence.Repositories;
 using SmartEventBooking.Shared.Configuration;
@@ -16,6 +20,8 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        services.Configure<AdminOptions>(configuration.GetSection(AdminOptions.SectionName));
+
         services
             .AddOptions<DatabaseSettings>()
             .BindConfiguration(DatabaseSettings.SectionName)
@@ -37,9 +43,26 @@ public static class DependencyInjection
             });
         });
 
-        services.AddScoped<IEventRepository, EventRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IEventRepository, EventRepository>();
+
+        services.AddScoped<IAuthService, AuthService>();
+        
+        services.AddScoped<IDatabaseSeeder, IdentitySeeder>();
+
 
         return services;
+    }
+
+    public static async Task InitialiseDatabaseAsync(this WebApplication app)
+    {
+        using var scope = app.Services.CreateScope();
+
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await dbContext.Database.MigrateAsync();
+
+        var seeder = scope.ServiceProvider.GetRequiredService<IDatabaseSeeder>();
+        await seeder.SeedAsync();
     }
 }
