@@ -34,16 +34,6 @@ namespace SmartEventBooking.Infrastructure.Identity
         {
             _logger.LogInformation("Starting registration for user {Email}", dto.Email);
 
-            if (dto.Password != dto.ConfirmPassword)
-            {
-                _logger.LogWarning("Registration failed for {Email}: Passwords mismatch", dto.Email);
-                return new AuthResultDto 
-                { 
-                    Succeeded = false, 
-                    Errors = new[] { "Passwords mismatch." } 
-                };
-            }
-
             await _unitOfWork.BeginTransactionAsync();
 
             try

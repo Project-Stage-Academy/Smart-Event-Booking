@@ -47,7 +47,7 @@ public class UnitOfWork : IUnitOfWork
         {
             if (_currentTransaction != null)
             {
-                _currentTransaction.Dispose();
+                await _currentTransaction.DisposeAsync();
                 _currentTransaction = null;
             }
         }
@@ -66,9 +66,20 @@ public class UnitOfWork : IUnitOfWork
         {
             if (_currentTransaction != null)
             {
-                _currentTransaction.Dispose();
+                await _currentTransaction.DisposeAsync();
                 _currentTransaction = null;
             }
         }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_currentTransaction != null)
+        {
+            await _currentTransaction.DisposeAsync();
+            _currentTransaction = null;
+        }
+
+        GC.SuppressFinalize(this);
     }
 }

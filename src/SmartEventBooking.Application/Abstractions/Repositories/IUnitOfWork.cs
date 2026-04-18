@@ -1,7 +1,7 @@
 ﻿
 namespace SmartEventBooking.Application.Abstractions.Repositories
 {
-    public interface IUnitOfWork
+    public interface IUnitOfWork : IAsyncDisposable
     {
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task BeginTransactionAsync(CancellationToken cancellationToken = default);
