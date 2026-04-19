@@ -3,7 +3,7 @@ using SmartEventBooking.Application.Abstractions.Repositories;
 
 namespace SmartEventBooking.Infrastructure.Persistence.Repositories;
 
-public class UnitOfWork : IUnitOfWork
+public class UnitOfWork : IUnitOfWork, IDisposable
 {
     private readonly ApplicationDbContext _context;
     private IDbContextTransaction? _currentTransaction;
@@ -69,6 +69,13 @@ public class UnitOfWork : IUnitOfWork
                 _currentTransaction = null;
             }
         }
+    }
+
+    public void Dispose()
+    {
+        _currentTransaction?.Dispose();
+        _currentTransaction = null;
+        GC.SuppressFinalize(this);
     }
 
     public async ValueTask DisposeAsync()
