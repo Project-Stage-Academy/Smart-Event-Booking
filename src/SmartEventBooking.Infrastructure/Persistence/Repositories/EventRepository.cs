@@ -28,6 +28,11 @@ public class EventRepository : IEventRepository
         _context.Events.Add(@event);
     }
 
+    public async Task AddAsync(Event @event, CancellationToken cancellationToken = default)
+    {
+        await _context.Events.AddAsync(@event, cancellationToken);
+    }
+
     public void Update(Event @event)
     {
         _context.Events.Update(@event);
@@ -36,6 +41,11 @@ public class EventRepository : IEventRepository
     public void Delete(Event @event)
     {
         _context.Events.Remove(@event);
+    }
+
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default)

@@ -1,0 +1,107 @@
+﻿@model SmartEventBooking.Application.DTOs.CreateEvent.CreateEventDto
+@using SmartEventBooking.Domain.Enums;
+
+@{
+    ViewData["Title"] = "Create Event";
+    var now = DateTime.Now.ToString("yyyy-MM-ddTHH:mm");
+}
+
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Створення події</h4>
+        </div>
+
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+
+                <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+             
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label">Назва події</label>
+                    <input asp-for="Title" class="form-control" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+
+               
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label">Опис</label>
+                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+              
+                <div class="mb-3">
+                    <label asp-for="Banner" class="form-label">Banner (URL картинки)</label>
+                    <input asp-for="Banner" class="form-control" />
+                    <span asp-validation-for="Banner" class="text-danger"></span>
+                </div>
+
+              
+                <div class="mb-3">
+                    <label asp-for="Status" class="form-label">Статус</label>
+                    <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<EventStatus>()">
+                        <option value="">Оберіть статус</option>
+                    </select>
+                    <span asp-validation-for="Status" class="text-danger"></span>
+                </div>
+
+               
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="StartDateTime" class="form-label">Початок</label>
+                        <input asp-for="StartDateTime" type="datetime-local" class="form-control" min="@now" value="2026-01-01T10:00" />
+                        <span asp-validation-for="StartDateTime" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="EndDateTime" class="form-label">Кінець</label>
+                        <input asp-for="EndDateTime" type="datetime-local" class="form-control" min="@now" value="2026-01-01T10:00" />
+                        <span asp-validation-for="EndDateTime" class="text-danger"></span>
+                    </div>
+                </div>
+
+               
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="TotalCapacity" class="form-label">Кількість місць</label>
+                        <input asp-for="TotalCapacity" type="number" class="form-control" />
+                        <span asp-validation-for="TotalCapacity" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Price" class="form-label">Ціна</label>
+                        <input asp-for="Price" type="number" step="0.01" class="form-control" />
+                        <span asp-validation-for="Price" class="text-danger"></span>
+                    </div>
+                </div>
+
+                
+                <div class="mb-3">
+                    <label asp-for="VenueId" class="form-label">Venue</label>
+                    <select asp-for="VenueId" class="form-select">
+                        <option value="">Select venue</option>
+                        @foreach (var v in ViewBag.Venues)
+                        {
+                            <option value="@v.Id">@v.Name</option>
+                        }
+                    </select>
+                    <span asp-validation-for="VenueId" class="text-danger"></span>
+                </div>
+
+                
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-secondary">Назад</a>
+                    <button type="submit" class="btn btn-primary">Створити</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
