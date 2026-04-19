@@ -45,7 +45,6 @@ public static class DependencyInjection
 
         services.AddScoped<UnitOfWork>();
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<UnitOfWork>());
-        services.AddScoped<IAsyncDisposable>(sp => sp.GetRequiredService<UnitOfWork>());
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IEventRepository, EventRepository>();
 

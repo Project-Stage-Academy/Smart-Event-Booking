@@ -93,7 +93,9 @@ namespace SmartEventBooking.Web.Tests.Controllers
 
             result.Should().BeOfType<ViewResult>();
             _controller.ModelState.IsValid.Should().BeFalse();
-            _controller.ModelState[string.Empty]?.Errors.Should().ContainSingle().Which.ErrorMessage.Should().Be("Error 1");
+            _controller.ModelState.Values.SelectMany(v => v.Errors)
+                .Should().ContainSingle()
+                .Which.ErrorMessage.Should().Be("Error 1");
         }
     }
 }

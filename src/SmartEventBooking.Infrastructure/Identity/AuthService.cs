@@ -82,17 +82,17 @@ namespace SmartEventBooking.Infrastructure.Identity
                 };
                 _userRepository.Add(domainUser);
                 
-                await _unitOfWork.CommitTransactionAsync();
-                
-                // Sign-in after successful registration and commit
+                // Sign-in before commit to ensure the process is atomic.
+                // If sign-in fails, the transaction will be rolled back.
                 await _signInManager.SignInAsync(appUser, isPersistent: false);
+                
+                await _unitOfWork.CommitTransactionAsync();
                 
                 _logger.LogInformation("User {Email} registered successfully", dto.Email);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred during registration for user {Email}", dto.Email);
-                await _unitOfWork.RollbackTransactionAsync();
                 throw;
             }
 

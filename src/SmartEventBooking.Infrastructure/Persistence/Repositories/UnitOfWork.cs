@@ -40,7 +40,6 @@ public class UnitOfWork : IUnitOfWork
         }
         catch
         {
-            await RollbackTransactionAsync(cancellationToken);
             throw;
         }
         finally
