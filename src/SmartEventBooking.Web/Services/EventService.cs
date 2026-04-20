@@ -73,7 +73,7 @@ namespace SmartEventBooking.Web.Services
                 request.TotalCapacity,
                 request.Price,
                 request.VenueId,
-                request.Status
+                request.Status.Value
             );
 
             if (!string.IsNullOrWhiteSpace(request.Banner))
@@ -112,7 +112,7 @@ namespace SmartEventBooking.Web.Services
                 request.TotalCapacity,
                 request.Price,
                 request.VenueId,
-                request.Status
+                request.Status.Value
             );
 
             _repository.Update(existingEvent);

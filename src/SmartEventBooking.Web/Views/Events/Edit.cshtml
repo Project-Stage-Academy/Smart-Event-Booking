@@ -4,6 +4,8 @@
 @{
     ViewData["Title"] = "Edit Event";
     var now = DateTime.Now.ToString("yyyy-MM-ddTHH:mm");
+    var statusList = Html.GetEnumSelectList<EventStatus>()
+                         .Where(x => x.Value != "0");
 }
 
 <div class="container mt-5">
@@ -41,7 +43,7 @@
                
                 <div class="mb-3">
                     <label asp-for="Status" class="form-label">Статус</label>
-                    <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<EventStatus>()">
+                    <select asp-for="Status" class="form-select" asp-items="statusList">
                         <option value="" disabled selected hidden>Оберіть статус</option>
                     </select>
                     <span asp-validation-for="Status" class="text-danger"></span>

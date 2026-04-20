@@ -29,8 +29,10 @@ namespace SmartEventBooking.Application.DTOs.UpdateEvent
         public decimal Price { get; set; }
         public string? Banner { get; set; }
 
-        [Required]
-        public EventStatus Status { get; set; }
+        [Required(ErrorMessage = "Status is required")]
+
+        [Range(1, 4, ErrorMessage = "Please select a valid status")]
+        public EventStatus? Status { get; set; }
 
         [Required(ErrorMessage = "Venue is required")]
         public Guid VenueId { get; set; }
