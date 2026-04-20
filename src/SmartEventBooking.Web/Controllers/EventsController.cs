@@ -9,7 +9,7 @@ using SmartEventBooking.Application.DTOs.Event;
 namespace SmartEventBooking.Web.Controllers
 {
    
-    //[Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     public class EventsController : Controller
     {
         public readonly EventService _service;
