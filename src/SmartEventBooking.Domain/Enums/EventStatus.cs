@@ -4,6 +4,9 @@ namespace SmartEventBooking.Domain.Enums;
 
 public enum EventStatus : byte
 {
+    [Display(Name = "Невідомий")]
+    Unknown = 0,
+
     [Display(Name = "Активний")]
     Active = 1,
 

@@ -9,7 +9,7 @@ using SmartEventBooking.Application.DTOs.Event;
 namespace SmartEventBooking.Web.Controllers
 {
    
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     public class EventsController : Controller
     {
         public readonly EventService _service;
@@ -24,7 +24,9 @@ namespace SmartEventBooking.Web.Controllers
             var events = await _service.GetAllAsync();
 
             if (events == null)
+            {
                 return Content("events is NULL");
+            } 
 
             return View(events ?? new List<EventDto>());
         }
@@ -38,10 +40,15 @@ namespace SmartEventBooking.Web.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateEventDto dto)
         {
             if (!ModelState.IsValid)
+            {
+                ViewBag.Venues = await _service.GetVenuesAsync();
                 return View("~/Views/Events/Create.cshtml", dto);
+            }
+            
 
             var id = await _service.CreateAsync(dto);
 
@@ -54,7 +61,9 @@ namespace SmartEventBooking.Web.Controllers
             var eventDto = await _service.GetByIdAsync(id);
 
             if (eventDto == null)
+            {
                 return NotFound();
+            } 
 
             return View(eventDto); 
         }
@@ -66,7 +75,10 @@ namespace SmartEventBooking.Web.Controllers
             var eventDto = await _service.GetByIdAsync(id);
 
             if (eventDto == null)
+            {
                 return NotFound();
+            }
+                
 
             ViewBag.Venues = await _service.GetVenuesAsync();
 
@@ -88,21 +100,37 @@ namespace SmartEventBooking.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(UpdateEventDto dto)
         {
+            
             if (!ModelState.IsValid)
+            {
+                ViewBag.Venues = await _service.GetVenuesAsync();
                 return View("~/Views/Events/Edit.cshtml", dto);
+            }
 
-            await _service.UpdateAsync(dto);
+            var updated = await _service.UpdateAsync(dto);
+
+            if (!updated)
+            {
+                return NotFound();
+            }
 
             return RedirectToAction("Details", new { id = dto.Id });
         }
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {
-            await _service.DeleteAsync(id);
+            var deleted = await _service.DeleteAsync(id);
+
+            if(!deleted)
+            {
+                return NotFound();
+            }
 
             TempData["Success"] = "Подію успішно видалено";
             return RedirectToAction("Index");

@@ -56,9 +56,15 @@ namespace SmartEventBooking.Web.Services
             };
         }
 
-        public async Task<Guid> CreateAsync(CreateEventDto request, CancellationToken cancellationToken = default)
+        public async Task<Guid?> CreateAsync(CreateEventDto request, CancellationToken cancellationToken = default)
         {
-            var newEvent = new Event(
+            var venueExists = await _venueRepository.ExistsAsync(request.VenueId, cancellationToken);
+
+            if (!venueExists)
+            {
+                return null;
+            }
+                var newEvent = new Event(
                 Guid.NewGuid(),
                 request.Title,
                 request.Description,
@@ -81,12 +87,21 @@ namespace SmartEventBooking.Web.Services
             return newEvent.Id;
         }
 
-        public async Task UpdateAsync(UpdateEventDto request, CancellationToken cancellationToken = default)
+        public async Task<bool> UpdateAsync(UpdateEventDto request, CancellationToken cancellationToken = default)
         {
             var existingEvent = await _repository.GetByIdAsync(request.Id, cancellationToken);
 
             if (existingEvent == null)
-                throw new Exception("Event not found");
+            {
+               return false;
+            }
+
+            var venueExists = await _venueRepository.ExistsAsync(request.VenueId, cancellationToken);
+
+            if (!venueExists)
+            {
+                return false;
+            }
 
             existingEvent.Update(
                 request.Title,
@@ -103,6 +118,8 @@ namespace SmartEventBooking.Web.Services
             _repository.Update(existingEvent);
 
             await _repository.SaveChangesAsync(cancellationToken);
+
+            return true;
         }
 
         public async Task<List<VenueDto>> GetVenuesAsync(CancellationToken cancellationToken = default)
@@ -116,15 +133,19 @@ namespace SmartEventBooking.Web.Services
             }).ToList();
         }
 
-        public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var ev = await _repository.GetByIdAsync(id, cancellationToken);
 
             if (ev == null)
-                throw new Exception("Event not found");
-
+            {
+                return false;
+            }
+                
             _repository.Delete(ev);
             await _repository.SaveChangesAsync(cancellationToken);
+
+            return true;
         }
 
     }

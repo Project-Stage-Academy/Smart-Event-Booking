@@ -26,6 +26,8 @@ namespace SmartEventBooking.Application.DTOs.CreateEvent
         public decimal Price { get; set; }
 
         public string? Banner { get; set; }
+
+        [Required]
         public EventStatus Status { get; set; }
 
         [Required(ErrorMessage = "Venue is required")]

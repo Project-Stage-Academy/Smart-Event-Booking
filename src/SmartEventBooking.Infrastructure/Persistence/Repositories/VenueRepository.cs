@@ -18,5 +18,10 @@ namespace SmartEventBooking.Infrastructure.Repositories
         {
             return await _context.Venues.ToListAsync(cancellationToken);
         }
+
+        public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return await _context.Venues.AnyAsync(v => v.Id == id, cancellationToken);
+        }
     }
 }

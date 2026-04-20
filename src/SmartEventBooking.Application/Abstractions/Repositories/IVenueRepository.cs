@@ -8,5 +8,6 @@ namespace SmartEventBooking.Application.Abstractions.Repositories
     public interface IVenueRepository
     {
         Task<List<Venue>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default);
     }
 }

@@ -28,6 +28,8 @@ namespace SmartEventBooking.Application.DTOs.UpdateEvent
         [Range(0, double.MaxValue, ErrorMessage = "Price cannot be negative")]
         public decimal Price { get; set; }
         public string? Banner { get; set; }
+
+        [Required]
         public EventStatus Status { get; set; }
 
         [Required(ErrorMessage = "Venue is required")]
