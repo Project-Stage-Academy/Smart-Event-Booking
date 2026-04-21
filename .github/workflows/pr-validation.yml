@@ -21,7 +21,7 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore --configuration Release
+        run: dotnet restore -p:Configuration=Release
       
       - name: Build project
         run: dotnet build --no-restore --configuration Release
