@@ -7,6 +7,7 @@
     <Project Path="src/SmartEventBooking.Web/SmartEventBooking.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <File Path="src/SmartEventBooking.Web/.env" />
     <Project Path="SmartEventBooking.Infrastructure.IntegrationTests/SmartEventBooking.Infrastructure.IntegrationTests.csproj" Id="ff0fdb7a-e2f2-4d11-8c5d-fee1440c01a1">
       <Build Solution="Debug|*" Project="false" />
     </Project>

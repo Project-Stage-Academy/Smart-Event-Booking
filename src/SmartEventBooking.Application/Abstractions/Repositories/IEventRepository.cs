@@ -9,4 +9,6 @@ public interface IEventRepository
     void Update(Event @event);
     void Delete(Event @event);
     Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default);
+    Task SaveChangesAsync(CancellationToken cancellationToken = default);
+    Task AddAsync(Event @event, CancellationToken cancellationToken = default);
 }

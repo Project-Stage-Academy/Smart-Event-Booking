@@ -10,6 +10,7 @@ using SmartEventBooking.Infrastructure.Configuration;
 using SmartEventBooking.Infrastructure.Identity;
 using SmartEventBooking.Infrastructure.Persistence;
 using SmartEventBooking.Infrastructure.Persistence.Repositories;
+using SmartEventBooking.Infrastructure.Repositories;
 using SmartEventBooking.Shared.Configuration;
 
 namespace SmartEventBooking.Infrastructure;
@@ -35,6 +36,8 @@ public static class DependencyInjection
         {
             var settings = sp.GetRequiredService<IOptions<DatabaseSettings>>();
             var connectionString = DatabaseConnectionFactory.BuildConnectionString(configuration, settings);
+
+
             options.UseSqlServer(connectionString, sqlOptions =>
             {
                 sqlOptions.EnableRetryOnFailure(maxRetryCount: 3,
@@ -51,6 +54,8 @@ public static class DependencyInjection
         
         services.AddScoped<IDatabaseSeeder, IdentitySeeder>();
 
+        services.AddScoped<IVenueRepository, VenueRepository>();
+
 
         return services;
     }
@@ -60,7 +65,7 @@ public static class DependencyInjection
         using var scope = app.Services.CreateScope();
 
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        await dbContext.Database.MigrateAsync();
+         await dbContext.Database.MigrateAsync();
 
         var seeder = scope.ServiceProvider.GetRequiredService<IDatabaseSeeder>();
         await seeder.SeedAsync();

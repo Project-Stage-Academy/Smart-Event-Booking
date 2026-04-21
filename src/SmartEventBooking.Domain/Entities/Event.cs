@@ -1,5 +1,6 @@
 using SmartEventBooking.Domain.Enums;
 using System;
+using System.Reflection;
 
 namespace SmartEventBooking.Domain.Entities;
 
@@ -21,12 +22,14 @@ public class Event
 
     private Event() { }
 
-    public Event(Guid id, string title, string? description, DateTime startDateTime, DateTime endDateTime, int totalCapacity, decimal price, Guid venueId)
+    public Event(Guid id, string title, string? description, DateTime startDateTime, DateTime endDateTime, int totalCapacity, decimal price, Guid venueId, EventStatus status)
     {
         if (string.IsNullOrWhiteSpace(title))
             throw new ArgumentException("Title cannot be empty.", nameof(title));
         if (totalCapacity <= 0)
             throw new ArgumentException("Capacity must be greater than zero.", nameof(totalCapacity));
+        if (startDateTime < DateTime.Now)
+            throw new ArgumentException("Start date cannot be in the past.", nameof(startDateTime));
         if (startDateTime >= endDateTime)
             throw new ArgumentException("Start date must be before end date.", nameof(startDateTime));
         if (price < 0)
@@ -40,7 +43,7 @@ public class Event
         TotalCapacity = totalCapacity;
         AvailableSeats = totalCapacity;
         Price = price;
-        Status = EventStatus.Active; 
+        Status = status; 
         VenueId = venueId;
     }
 
@@ -83,5 +86,39 @@ public class Event
             
         TotalCapacity = totalCapacity;
         AvailableSeats = availableSeats;
+    }
+
+    public void Update(string title, string? description, string? banner,  DateTime startDateTime, DateTime endDateTime, int totalCapacity, decimal price,  Guid venueId, EventStatus status)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+            throw new ArgumentException("Title cannot be empty.", nameof(title));
+
+        if (totalCapacity <= 0)
+            throw new ArgumentException("Capacity must be greater than zero.", nameof(totalCapacity));
+
+        if (startDateTime < DateTime.Now)
+            throw new ArgumentException("Start date cannot be in the past.", nameof(startDateTime));
+
+        if (startDateTime >= endDateTime)
+            throw new ArgumentException("Start date must be before end date.", nameof(startDateTime));
+
+        if (price < 0)
+            throw new ArgumentException("Price cannot be negative.", nameof(price));
+
+        Title = title;
+        Description = description;
+        StartDateTime = startDateTime;
+        EndDateTime = endDateTime;
+
+        var bookedSeats = TotalCapacity - AvailableSeats;
+        var newAvailableSeats = totalCapacity - bookedSeats;
+
+       
+        UpdateCapacity(totalCapacity, newAvailableSeats);
+
+        Price = price;
+        VenueId = venueId;
+        Banner = banner;
+        Status = status;
     }
 }
