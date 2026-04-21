@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using SmartEventBooking.Application.Abstractions.Identity;
 using SmartEventBooking.Application.Abstractions.Repositories;
 using SmartEventBooking.Application.DTOs.Auth;
@@ -13,62 +14,66 @@ namespace SmartEventBooking.Infrastructure.Identity
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<AuthService> _logger;
 
         public AuthService(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IUserRepository userRepository,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            ILogger<AuthService> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _userRepository = userRepository;
             _unitOfWork = unitOfWork;
+            _logger = logger;
         }
 
         public async Task<AuthResultDto> RegisterAsync(RegisterDto dto)
         {
-            if (dto.Password != dto.ConfirmPassword)
-            {
-                return new AuthResultDto 
-                { 
-                    Succeeded = false, 
-                    Errors = new[] { "Passwords mismatch." } 
-                };
-            }
+            _logger.LogInformation("Starting registration for user {Email}", dto.Email);
 
-            var appUser = new ApplicationUser
-            {
-                Id = Guid.NewGuid(),
-                UserName = dto.Email,
-                Email = dto.Email
-            };
-
-            var result = await _userManager.CreateAsync(appUser, dto.Password);
-
-            if (!result.Succeeded)
-            {
-                return new AuthResultDto
-                {
-                    Succeeded = false,
-                    Errors = result.Errors.Select(e => e.Description)
-                };
-            }
-
-            var addToRoleResult = await _userManager.AddToRoleAsync(appUser, RoleConstants.User);
-            if (!addToRoleResult.Succeeded)
-            {
-                await _userManager.DeleteAsync(appUser);
-
-                return new AuthResultDto
-                {
-                    Succeeded = false,
-                    Errors = addToRoleResult.Errors.Select(e => e.Description)
-                };
-            }
+            await _unitOfWork.BeginTransactionAsync();
 
             try
             {
+                var appUser = new ApplicationUser
+                {
+                    Id = Guid.NewGuid(),
+                    UserName = dto.Email,
+                    Email = dto.Email
+                };
+
+                var result = await _userManager.CreateAsync(appUser, dto.Password);
+
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogWarning("Identity user creation failed for {Email}: {Errors}", dto.Email, errors);
+                    
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return new AuthResultDto
+                    {
+                        Succeeded = false,
+                        Errors = result.Errors.Select(e => e.Description)
+                    };
+                }
+
+                var addToRoleResult = await _userManager.AddToRoleAsync(appUser, RoleConstants.User);
+                if (!addToRoleResult.Succeeded)
+                {
+                    var errors = string.Join(", ", addToRoleResult.Errors.Select(e => e.Description));
+                    _logger.LogWarning("Adding user {Email} to role failed: {Errors}", dto.Email, errors);
+
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return new AuthResultDto
+                    {
+                        Succeeded = false,
+                        Errors = addToRoleResult.Errors.Select(e => e.Description)
+                    };
+                }
+
                 var domainUser = new User
                 {
                     Id = appUser.Id,
@@ -76,40 +81,22 @@ namespace SmartEventBooking.Infrastructure.Identity
                     LastName = dto.LastName
                 };
                 _userRepository.Add(domainUser);
-                await _unitOfWork.SaveChangesAsync();
+                
+                // Sign-in before commit to ensure the process is atomic.
+                // If sign-in fails, the transaction will be rolled back.
+                await _signInManager.SignInAsync(appUser, isPersistent: false);
+                
+                await _unitOfWork.CommitTransactionAsync();
+                
+                _logger.LogInformation("User {Email} registered successfully", dto.Email);
             }
-            catch
+            catch (Exception ex)
             {
-                await _userManager.DeleteAsync(appUser);
+                _logger.LogError(ex, "An error occurred during registration for user {Email}", dto.Email);
                 throw;
             }
 
             return new AuthResultDto { Succeeded = true };
-        }
-
-        public async Task<AuthResultDto> LoginAsync(LoginDto dto)
-        {
-            var result = await _signInManager.PasswordSignInAsync(
-                dto.Email,
-                dto.Password,
-                dto.RememberMe,
-                lockoutOnFailure: false);
-
-            if (result.Succeeded)
-            {
-                return new AuthResultDto { Succeeded = true };
-            }
-
-            return new AuthResultDto
-            {
-                Succeeded = false,
-                Errors = new[] { "Invalid email or password." }
-            };
-        }
-
-        public async Task LogoutAsync()
-        {
-            await _signInManager.SignOutAsync();
         }
     }
 }

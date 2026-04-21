@@ -24,7 +24,7 @@ public class IdentitySeederTests
         await EnsureDatabaseCreatedAsync(provider);
         await SeedAsync(provider);
 
-        using var scope = provider.CreateScope();
+        await using var scope = provider.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
@@ -54,7 +54,7 @@ public class IdentitySeederTests
         await SeedAsync(provider);
         await SeedAsync(provider);
 
-        using var scope = provider.CreateScope();
+        await using var scope = provider.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         var seededRolesCount = await dbContext.Roles.CountAsync(
@@ -78,7 +78,7 @@ public class IdentitySeederTests
         await EnsureDatabaseCreatedAsync(provider);
         await SeedAsync(provider);
 
-        using var scope = provider.CreateScope();
+        await using var scope = provider.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
         var roles = await dbContext.Roles.Select(x => x.Name).ToListAsync();
@@ -126,14 +126,14 @@ public class IdentitySeederTests
 
     private static async Task EnsureDatabaseCreatedAsync(ServiceProvider provider)
     {
-        using var scope = provider.CreateScope();
+        await using var scope = provider.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         await dbContext.Database.EnsureCreatedAsync();
     }
 
     private static async Task SeedAsync(ServiceProvider provider)
     {
-        using var scope = provider.CreateScope();
+        await using var scope = provider.CreateAsyncScope();
         var seeder = scope.ServiceProvider.GetRequiredService<IDatabaseSeeder>();
         await seeder.SeedAsync();
     }

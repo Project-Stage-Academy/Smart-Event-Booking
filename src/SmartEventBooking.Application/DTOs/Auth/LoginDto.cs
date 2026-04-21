@@ -1,5 +1,4 @@
-﻿
-namespace SmartEventBooking.Application.DTOs.Auth
+﻿namespace SmartEventBooking.Application.DTOs.Auth
 {
     public class LoginDto
     {

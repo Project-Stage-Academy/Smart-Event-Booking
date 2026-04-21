@@ -30,6 +30,20 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Events" asp-action="Index">Event</a>
                         </li>
                     </ul>
+                    <ul class="navbar-nav">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <span class="nav-link text-dark">Hello, @User.Identity.Name!</span>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Auth" asp-action="Register">Register</a>
+                            </li>
+                        }
+                    </ul>
                 </div>
             </div>
         </nav>
