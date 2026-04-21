@@ -1,5 +1,7 @@
 using SmartEventBooking.Domain.Enums;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace SmartEventBooking.Domain.Entities;
@@ -19,6 +21,9 @@ public class Event
     public byte[]? RowVersion { get; private set; }
     public Guid VenueId { get; private set; }
     public Venue Venue { get; private set; } = null!;
+
+    private readonly List<EventCategory> _eventCategories = new();
+    public IReadOnlyCollection<EventCategory> EventCategories => _eventCategories.AsReadOnly();
 
     private Event() { }
 
@@ -120,5 +125,33 @@ public class Event
         VenueId = venueId;
         Banner = banner;
         Status = status;
+    }
+
+    public void AddCategory(EventCategory category)
+    {
+        if (category == null)
+            throw new ArgumentNullException(nameof(category));
+
+        if (_eventCategories.Any(c => c.Id == category.Id))
+            throw new InvalidOperationException("This category is already added to the event.");
+
+        _eventCategories.Add(category);
+    }
+
+    public void RemoveCategory(EventCategory category)
+    {
+        if (category == null)
+            throw new ArgumentNullException(nameof(category));
+
+        var existingCategory = _eventCategories.FirstOrDefault(c => c.Id == category.Id);
+        if (existingCategory == null)
+            throw new InvalidOperationException("Category not found in this event.");
+
+        _eventCategories.Remove(existingCategory);
+    }
+
+    public void ClearCategories()
+    {
+        _eventCategories.Clear();
     }
 }

@@ -21,9 +21,9 @@ public class EventsController : ControllerBase
 
     [HttpGet("upcoming")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetUpcoming([FromQuery] int page = 1, [FromQuery] int pageSize = 5)
+    public async Task<IActionResult> GetUpcoming([FromQuery] int page = 1, [FromQuery] int pageSize = 5, [FromQuery] EventSearchDto? searchDto = null)
     {
-        var result = await _service.GetUpcomingAsync(page, pageSize);
+        var result = await _service.GetUpcomingAsync(page, pageSize, searchDto);
         return Ok(result);
     }
 

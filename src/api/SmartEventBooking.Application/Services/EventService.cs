@@ -31,6 +31,7 @@ namespace SmartEventBooking.Application.Services
             {
                 Id = e.Id,
                 Title = e.Title,
+                Categories = e.EventCategories?.Select(ec => ec.Category.Name).ToList() ?? new List<string>(),
                 StartDateTime = e.StartDateTime,
                 EndDateTime = e.EndDateTime,
                 Price = e.Price
@@ -45,16 +46,17 @@ namespace SmartEventBooking.Application.Services
             };
         }
 
-        public async Task<PaginatedListDto<EventDto>> GetUpcomingAsync(int page = 1, int pageSize = 5, CancellationToken cancellationToken = default)
+        public async Task<PaginatedListDto<EventDto>> GetUpcomingAsync(int page = 1, int pageSize = 5, EventSearchDto? searchDto = null, CancellationToken cancellationToken = default)
         {
             var skip = (page - 1) * pageSize;
-            var events = await _repository.GetUpcomingAsync(skip, pageSize, cancellationToken);
-            var totalCount = await _repository.GetUpcomingCountAsync(cancellationToken);
+            var events = await _repository.GetUpcomingAsync(skip, pageSize, searchDto, cancellationToken);
+            var totalCount = await _repository.GetUpcomingCountAsync(searchDto, cancellationToken);
 
             var items = events.Select(e => new EventDto
             {
                 Id = e.Id,
                 Title = e.Title,
+                Categories = e.EventCategories.Select(ec => ec.Category.Name).ToList(),
                 StartDateTime = e.StartDateTime,
                 EndDateTime = e.EndDateTime,
                 Price = e.Price

@@ -1,21 +1,27 @@
 import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { EventService } from '../../core/services/event.service';
+import { CategoryService } from '../../core/services/category.service';
 import { Event } from '../../core/models/event.model';
+import { Category } from '../../core/models/category.model';
+import { EventSearchDto } from '../../core/models/event-search.model';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-events-list',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './events-list.component.html',
   styleUrls: ['./events-list.component.scss']
 })
 export class EventsListComponent implements OnInit, OnDestroy {
   private eventService = inject(EventService);
+  private categoryService = inject(CategoryService);
   private cdr = inject(ChangeDetectorRef);
   private subscription?: Subscription;
+  private categorySubscription?: Subscription;
 
   paginatedEvents: Event[] = [];
   isLoading = true;
@@ -25,16 +31,40 @@ export class EventsListComponent implements OnInit, OnDestroy {
   totalPages = 0;
   totalCount = 0;
 
+  searchFilters: EventSearchDto = {};
+
+  categories: Category[] = [];
+
   ngOnInit(): void {
+    this.loadCategories();
     this.loadEvents();
   }
 
+  loadCategories(): void {
+    this.categorySubscription = this.categoryService.getCategories().subscribe({
+      next: (response) => {
+        this.categories = response;
+      },
+      error: (err) => console.error('Failed to load categories', err)
+    });
+  }
+
+  applyFilters(): void {
+    this.currentPage = 1;
+    this.loadEvents();
+  }
+
+  clearFilters(): void {
+    this.searchFilters = {};
+    this.currentPage = 1;
+    this.loadEvents();
+  }
 
   loadEvents(): void {
     this.isLoading = true;
     this.subscription?.unsubscribe();
     
-    this.subscription = this.eventService.getUpcomingEvents(this.currentPage, this.pageSize).subscribe({
+    this.subscription = this.eventService.getUpcomingEvents(this.currentPage, this.pageSize, this.searchFilters).subscribe({
       next: (response) => {
         this.paginatedEvents = response.items || [];
         this.totalCount = response.totalCount || 0;
@@ -54,6 +84,7 @@ export class EventsListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription?.unsubscribe();
+    this.categorySubscription?.unsubscribe();
   }
 
   nextPage(): void {

@@ -2,6 +2,7 @@ export interface Event {
   id: string;
   title: string;
   description?: string;
+  categories?: string[];
   startDateTime: Date | string;
   endDateTime: Date | string;
   totalCapacity: number;

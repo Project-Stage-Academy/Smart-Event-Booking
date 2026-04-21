@@ -10,7 +10,7 @@ namespace SmartEventBooking.Application.Abstractions.Services
     public interface IEventService
     {
         Task<PaginatedListDto<EventDto>> GetAllAsync(int page = 1, int pageSize = 5, CancellationToken cancellationToken = default);
-        Task<PaginatedListDto<EventDto>> GetUpcomingAsync(int page = 1, int pageSize = 5, CancellationToken cancellationToken = default);
+        Task<PaginatedListDto<EventDto>> GetUpcomingAsync(int page = 1, int pageSize = 5, EventSearchDto? searchDto = null, CancellationToken cancellationToken = default);
         Task<DetailsDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
         Task<Guid?> CreateAsync(CreateEventDto request, CancellationToken cancellationToken = default);
         Task<bool> UpdateAsync(UpdateEventDto request, CancellationToken cancellationToken = default);

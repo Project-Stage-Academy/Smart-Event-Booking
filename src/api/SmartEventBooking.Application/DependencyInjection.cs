@@ -13,6 +13,7 @@ namespace SmartEventBooking.Application
         {
             // Register business Services later here
             services.AddScoped<IEventService, EventService>();
+            services.AddScoped<ICategoryService, CategoryService>();
 
             return services;
         }

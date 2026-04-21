@@ -12,6 +12,8 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<User> DomainUsers { get; set; }
     public DbSet<Event> Events { get; set; }
     public DbSet<Venue> Venues { get; set; } = null!;
+    public DbSet<Category> Categories { get; set; } = null!;
+    public DbSet<EventCategory> EventCategories { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

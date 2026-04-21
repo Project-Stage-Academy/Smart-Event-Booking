@@ -1,13 +1,31 @@
 <div class="events-container">
   <h2>Upcoming Events</h2>
   
+  <div class="filters-panel">
+    <input type="text" [(ngModel)]="searchFilters.keyword" placeholder="Search by title or description" (keyup.enter)="applyFilters()">
+    
+    <select [(ngModel)]="searchFilters.categoryId" (change)="applyFilters()">
+      <option [ngValue]="undefined">All Categories</option>
+      <option *ngFor="let cat of categories" [ngValue]="cat.id">{{ cat.name | titlecase }}</option>
+    </select>
+    
+    <div class="date-filters">
+      <input type="date" [(ngModel)]="searchFilters.startDate" placeholder="Start Date" (change)="applyFilters()">
+      <input type="date" [(ngModel)]="searchFilters.endDate" placeholder="End Date" (change)="applyFilters()">
+    </div>
+    
+    <div class="filter-actions">
+      <button class="btn-clear" (click)="clearFilters()">Clear Filters</button>
+    </div>
+  </div>
+  
   <div *ngIf="!isLoading; else loading">
     <div class="events-table-wrapper" *ngIf="totalCount > 0; else emptyState">
       <table class="events-table">
         <thead>
           <tr>
-            <!-- <th>Banner</th> -->
             <th>Title</th>
+            <th>Category</th>
             <th>Date</th>
             <th>Location</th>
             <th>Price</th>
@@ -16,10 +34,8 @@
         </thead>
         <tbody>
           <tr *ngFor="let event of paginatedEvents">
-            <!-- <td class="banner-cell">
-              <img [src]="event.banner || 'assets/default-banner.jpg'" [alt]="event.title" loading="lazy" />
-            </td> -->
             <td>{{ event.title }}</td>
+            <td class="category-cell" [title]="event.categories?.join(', ') || 'N/A'">{{ event.categories?.join(', ') || 'N/A' }}</td>
             <td>
               <i class="icon-calendar"></i> {{ event.startDateTime | date: 'mediumDate' }}
             </td>

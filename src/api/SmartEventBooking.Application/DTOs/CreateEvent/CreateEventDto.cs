@@ -13,6 +13,8 @@ namespace SmartEventBooking.Application.DTOs.CreateEvent
         public string Title { get; set; } = null!;
 
         public string? Description { get; set; }
+        
+        public string? Category { get; set; }
 
         [Required(ErrorMessage = "Start date is required")]
         public DateTime StartDateTime { get; set; }
