@@ -5,6 +5,9 @@ public interface IEventRepository
 {
     Task<Event?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<IEnumerable<Event>> GetAllAsync(int skip, int take, CancellationToken cancellationToken = default);
+    Task<int> GetCountAsync(CancellationToken cancellationToken = default);
+    Task<IEnumerable<Event>> GetUpcomingAsync(int skip, int take, CancellationToken cancellationToken = default);
+    Task<int> GetUpcomingCountAsync(CancellationToken cancellationToken = default);
     void Add(Event @event);
     void Update(Event @event);
     void Delete(Event @event);

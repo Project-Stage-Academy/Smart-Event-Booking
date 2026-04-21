@@ -1,15 +1,17 @@
 ﻿using SmartEventBooking.Application.Abstractions.Repositories;
+using SmartEventBooking.Application.Abstractions.Services;
 using SmartEventBooking.Application.DTOs.CreateEvent;
 using SmartEventBooking.Application.DTOs.UpdateEvent;
 using SmartEventBooking.Application.DTOs.Event;
 using SmartEventBooking.Application.DTOs.Detail;
 using SmartEventBooking.Application.DTOs.Venue;
+using SmartEventBooking.Application.DTOs.Common;
 using SmartEventBooking.Domain.Entities;
 
 
-namespace SmartEventBooking.Web.Services
+namespace SmartEventBooking.Application.Services
 {
-    public class EventService
+    public class EventService : IEventService
     {
         public readonly IEventRepository _repository;
         private readonly IVenueRepository _venueRepository;
@@ -19,11 +21,13 @@ namespace SmartEventBooking.Web.Services
             _venueRepository = venueRepository;
         }
 
-        public async Task<List<EventDto>> GetAllAsync(CancellationToken cancellationToken = default)
+        public async Task<PaginatedListDto<EventDto>> GetAllAsync(int page = 1, int pageSize = 5, CancellationToken cancellationToken = default)
         {
-            var events = await _repository.GetAllAsync(0, 100, cancellationToken);
+            var skip = (page - 1) * pageSize;
+            var events = await _repository.GetAllAsync(skip, pageSize, cancellationToken);
+            var totalCount = await _repository.GetCountAsync(cancellationToken);
 
-            return events.Select(e => new EventDto
+            var items = events.Select(e => new EventDto
             {
                 Id = e.Id,
                 Title = e.Title,
@@ -31,6 +35,38 @@ namespace SmartEventBooking.Web.Services
                 EndDateTime = e.EndDateTime,
                 Price = e.Price
             }).ToList();
+
+            return new PaginatedListDto<EventDto>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
+
+        public async Task<PaginatedListDto<EventDto>> GetUpcomingAsync(int page = 1, int pageSize = 5, CancellationToken cancellationToken = default)
+        {
+            var skip = (page - 1) * pageSize;
+            var events = await _repository.GetUpcomingAsync(skip, pageSize, cancellationToken);
+            var totalCount = await _repository.GetUpcomingCountAsync(cancellationToken);
+
+            var items = events.Select(e => new EventDto
+            {
+                Id = e.Id,
+                Title = e.Title,
+                StartDateTime = e.StartDateTime,
+                EndDateTime = e.EndDateTime,
+                Price = e.Price
+            }).ToList();
+
+            return new PaginatedListDto<EventDto>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
         }
 
         public async Task<DetailsDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)

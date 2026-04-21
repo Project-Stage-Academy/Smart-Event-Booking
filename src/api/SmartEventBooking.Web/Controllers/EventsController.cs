@@ -1,158 +1,87 @@
-﻿using AspNetCoreGeneratedDocument;
-using Microsoft.AspNetCore.Mvc;
-using SmartEventBooking.Web.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SmartEventBooking.Application.DTOs.CreateEvent;
-using SmartEventBooking.Application.DTOs.UpdateEvent;
 using SmartEventBooking.Application.DTOs.Event;
+using SmartEventBooking.Application.DTOs.UpdateEvent;
+using SmartEventBooking.Application.Abstractions.Services;
 using SmartEventBooking.Domain.Constants;
 
-namespace SmartEventBooking.Web.Controllers
+namespace SmartEventBooking.Web.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class EventsController : ControllerBase
 {
-   
-    [Authorize(Roles = RoleConstants.Admin)]
-    public class EventsController : Controller
+    private readonly IEventService _service;
+
+    public EventsController(IEventService service)
     {
-        public readonly EventService _service;
+        _service = service;
+    }
 
-        public EventsController(EventService service)
-        {
-            _service = service;
-        }
+    [HttpGet("upcoming")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetUpcoming([FromQuery] int page = 1, [FromQuery] int pageSize = 5)
+    {
+        var result = await _service.GetUpcomingAsync(page, pageSize);
+        return Ok(result);
+    }
 
-        public async Task<IActionResult> Index()
-        {
-            var events = await _service.GetAllAsync();
+    [HttpGet]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 5)
+    {
+        var result = await _service.GetAllAsync(page, pageSize);
+        return Ok(result);
+    }
 
-            if (events == null)
-            {
-                return Content("events is NULL");
-            } 
+    [HttpGet("{id:guid}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        var eventDto = await _service.GetByIdAsync(id);
+        if (eventDto == null)
+            return NotFound();
 
-            return View(events ?? new List<EventDto>());
-        }
+        return Ok(eventDto);
+    }
 
-        [HttpGet]
-        public async Task<IActionResult> Create()
-        {
-            var model = new CreateEventDto
-            {
-                StartDateTime = DateTime.Now,
-                EndDateTime = DateTime.Now.AddHours(1)
-            };
-            ViewBag.Venues = await _service.GetVenuesAsync();
-            return View("~/Views/Events/Create.cshtml", model);
-        }
+    [HttpPost]
+    [Authorize(Roles = RoleConstants.Admin)]
+    public async Task<IActionResult> Create(CreateEventDto dto)
+    {
+        if (dto.StartDateTime < DateTime.UtcNow)
+            return BadRequest("Start date cannot be in the past.");
 
+        if (dto.EndDateTime <= dto.StartDateTime)
+            return BadRequest("End date must be after start date.");
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateEventDto dto)
-        {
-            if (!ModelState.IsValid)
-            {
-                ViewBag.Venues = await _service.GetVenuesAsync();
-                return View("~/Views/Events/Create.cshtml", dto);
-            }
+        var id = await _service.CreateAsync(dto);
+        return CreatedAtAction(nameof(GetById), new { id }, new { id });
+    }
 
-            if (dto.StartDateTime < DateTime.Now)
-            {
-                ModelState.AddModelError("StartDateTime", "Start date cannot be in the past.");
-                return View(dto);
-            }
+    [HttpPut("{id:guid}")]
+    [Authorize(Roles = RoleConstants.Admin)]
+    public async Task<IActionResult> Edit(Guid id, UpdateEventDto dto)
+    {
+        if (id != dto.Id)
+            return BadRequest("Id mismatch.");
 
-            if (dto.EndDateTime <= dto.StartDateTime)
-            {
-                ModelState.AddModelError("EndDateTime", "End date must be after start date.");
-                return View(dto);
-            }
+        var updated = await _service.UpdateAsync(dto);
+        if (!updated)
+            return NotFound();
 
-            var id = await _service.CreateAsync(dto);
+        return NoContent();
+    }
 
-            return RedirectToAction("Details", new { id });
-        }
+    [HttpDelete("{id:guid}")]
+    [Authorize(Roles = RoleConstants.Admin)]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var deleted = await _service.DeleteAsync(id);
+        if (!deleted)
+            return NotFound();
 
-        [HttpGet]
-        public async Task<IActionResult> Details(Guid id)
-        {
-            var eventDto = await _service.GetByIdAsync(id);
-
-            if (eventDto == null)
-            {
-                return NotFound();
-            } 
-
-            return View(eventDto); 
-        }
-
-
-        [HttpGet]
-        public async Task<IActionResult> Edit(Guid id)
-        {
-            var eventDto = await _service.GetByIdAsync(id);
-
-            if (eventDto == null)
-            {
-                return NotFound();
-            }
-                
-
-            ViewBag.Venues = await _service.GetVenuesAsync();
-
-            var model = new UpdateEventDto
-            {
-                Id = eventDto.Id,
-                Title = eventDto.Title,
-                Description = eventDto.Description,
-                StartDateTime = eventDto.StartDateTime,
-                EndDateTime = eventDto.EndDateTime,
-                TotalCapacity = eventDto.TotalCapacity,
-                Price = eventDto.Price,
-                VenueId = eventDto.VenueId,
-                Banner = eventDto.Banner,
-                Status = eventDto.Status
-            };
-
-            return View("~/Views/Events/Edit.cshtml", model);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(UpdateEventDto dto)
-        {
-            
-            if (!ModelState.IsValid)
-            {
-                ViewBag.Venues = await _service.GetVenuesAsync();
-                return View("~/Views/Events/Edit.cshtml", dto);
-            }
-
-            var updated = await _service.UpdateAsync(dto);
-
-            if (!updated)
-            {
-                return NotFound();
-            }
-
-            return RedirectToAction("Details", new { id = dto.Id });
-        }
-
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            var deleted = await _service.DeleteAsync(id);
-
-            if(!deleted)
-            {
-                return NotFound();
-            }
-
-            TempData["Success"] = "Подію успішно видалено";
-            return RedirectToAction("Index");
-        }
-
-
+        return NoContent();
     }
 }

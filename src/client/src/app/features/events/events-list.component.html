@@ -1,0 +1,64 @@
+<div class="events-container">
+  <h2>Upcoming Events</h2>
+  
+  <div *ngIf="!isLoading; else loading">
+    <div class="events-table-wrapper" *ngIf="totalCount > 0; else emptyState">
+      <table class="events-table">
+        <thead>
+          <tr>
+            <!-- <th>Banner</th> -->
+            <th>Title</th>
+            <th>Date</th>
+            <th>Location</th>
+            <th>Price</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let event of paginatedEvents">
+            <!-- <td class="banner-cell">
+              <img [src]="event.banner || 'assets/default-banner.jpg'" [alt]="event.title" loading="lazy" />
+            </td> -->
+            <td>{{ event.title }}</td>
+            <td>
+              <i class="icon-calendar"></i> {{ event.startDateTime | date: 'mediumDate' }}
+            </td>
+            <td>
+              <span *ngIf="event.venue"><i class="icon-location"></i> {{ event.venue.name }}</span>
+              <span *ngIf="!event.venue">-</span>
+            </td>
+            <td>
+              <span *ngIf="event.price">{{ event.price | currency }}</span>
+              <span *ngIf="!event.price">Free</span>
+            </td>
+            <td>
+              <a [routerLink]="['/events', event.id]" class="btn-primary">View Details</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Fixed Pagination Controls -->
+      <div class="pagination-footer" *ngIf="totalPages > 1">
+        <button [disabled]="currentPage === 1" (click)="prevPage()">Previous</button>
+        <span class="pages-list">
+          <button 
+            *ngFor="let page of getPages()" 
+            [class.active]="page === currentPage" 
+            (click)="goToPage(page)">
+            {{ page }}
+          </button>
+        </span>
+        <button [disabled]="currentPage === totalPages" (click)="nextPage()">Next</button>
+      </div>
+    </div>
+
+    <ng-template #emptyState>
+      <p>No upcoming events found.</p>
+    </ng-template>
+  </div>
+  
+  <ng-template #loading>
+    <div class="loading">Loading events...</div>
+  </ng-template>
+</div>

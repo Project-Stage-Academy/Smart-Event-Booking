@@ -1,10 +1,11 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using SmartEventBooking.Web.Models;
 
 namespace SmartEventBooking.Web.Controllers;
 
-public class HomeController : Controller
+[ApiController]
+[Route("api/[controller]")]
+public class HomeController : ControllerBase
 {
     private readonly ILogger<HomeController> _logger;
 
@@ -13,21 +14,28 @@ public class HomeController : Controller
         _logger = logger;
     }
 
+    [HttpGet]
     public IActionResult Index()
     {
-        return View();
-    }
-   
-    public IActionResult Privacy()
-    {
-        return View();
+        return Ok(new { message = "Welcome to Smart Event Booking API" });
     }
 
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    [HttpGet("privacy")]
+    public IActionResult Privacy()
+    {
+        return Ok(new { message = "Privacy Policy Content" });
+    }
+
+    [HttpGet("error")]
     public IActionResult Error()
     {
         var requestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
         _logger.LogError("Error occurred. RequestId: {RequestId}", requestId);
-        return View(new ErrorViewModel { RequestId = null });
+
+        return Problem(
+            detail: "An unexpected error occurred processing your request.",
+            title: "Internal Server Error",
+            instance: requestId
+        );
     }
 }

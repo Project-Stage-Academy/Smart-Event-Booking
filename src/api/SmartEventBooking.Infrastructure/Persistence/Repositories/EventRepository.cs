@@ -23,6 +23,27 @@ public class EventRepository : IEventRepository
         return await _context.Events.OrderBy(e => e.Id).Skip(skip).Take(take).ToListAsync(cancellationToken);
     }
 
+    public async Task<int> GetCountAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.Events.CountAsync(cancellationToken);
+    }
+
+    public async Task<IEnumerable<Event>> GetUpcomingAsync(int skip, int take, CancellationToken cancellationToken = default)
+    {
+        return await _context.Events
+            .Where(e => e.StartDateTime >= DateTime.UtcNow)
+            .OrderBy(e => e.StartDateTime)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<int> GetUpcomingCountAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.Events
+            .CountAsync(e => e.StartDateTime >= DateTime.UtcNow, cancellationToken);
+    }
+
     public void Add(Event @event)
     {
         _context.Events.Add(@event);
