@@ -5,11 +5,12 @@ using Microsoft.AspNetCore.Authorization;
 using SmartEventBooking.Application.DTOs.CreateEvent;
 using SmartEventBooking.Application.DTOs.UpdateEvent;
 using SmartEventBooking.Application.DTOs.Event;
+using SmartEventBooking.Domain.Constants;
 
 namespace SmartEventBooking.Web.Controllers
 {
    
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = RoleConstants.Admin)]
     public class EventsController : Controller
     {
         public readonly EventService _service;
@@ -34,8 +35,13 @@ namespace SmartEventBooking.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
+            var model = new CreateEventDto
+            {
+                StartDateTime = DateTime.Now,
+                EndDateTime = DateTime.Now.AddHours(1)
+            };
             ViewBag.Venues = await _service.GetVenuesAsync();
-            return View("~/Views/Events/Create.cshtml", new CreateEventDto());
+            return View("~/Views/Events/Create.cshtml", model);
         }
 
 
@@ -48,7 +54,18 @@ namespace SmartEventBooking.Web.Controllers
                 ViewBag.Venues = await _service.GetVenuesAsync();
                 return View("~/Views/Events/Create.cshtml", dto);
             }
-            
+
+            if (dto.StartDateTime < DateTime.Now)
+            {
+                ModelState.AddModelError("StartDateTime", "Start date cannot be in the past.");
+                return View(dto);
+            }
+
+            if (dto.EndDateTime <= dto.StartDateTime)
+            {
+                ModelState.AddModelError("EndDateTime", "End date must be after start date.");
+                return View(dto);
+            }
 
             var id = await _service.CreateAsync(dto);
 

@@ -6,7 +6,8 @@ using System.Text;
 
 namespace SmartEventBooking.Application.DTOs.CreateEvent
 {
-    public class CreateEventDto
+    public class CreateEventDto : IValidatableObject
+
     {
         [Required(ErrorMessage = "Title is required")]
         public string Title { get; set; } = null!;
@@ -34,5 +35,22 @@ namespace SmartEventBooking.Application.DTOs.CreateEvent
 
         [Required(ErrorMessage = "Venue is required")]
         public Guid VenueId { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (StartDateTime < DateTime.Now)
+            {
+                yield return new ValidationResult(
+                    "Start date cannot be in the past",
+                    new[] { nameof(StartDateTime) });
+            }
+
+            if (EndDateTime <= StartDateTime)
+            {
+                yield return new ValidationResult(
+                    "End date must be after start date",
+                    new[] { nameof(EndDateTime) });
+            }
+        }
     }
 }

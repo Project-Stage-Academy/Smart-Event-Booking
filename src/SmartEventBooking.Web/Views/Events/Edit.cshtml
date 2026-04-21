@@ -53,13 +53,13 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label asp-for="StartDateTime" class="form-label">Початок</label>
-                        <input asp-for="StartDateTime" type="datetime-local" class="form-control" min="@now" />
+                        <input asp-for="StartDateTime" type="datetime-local" class="form-control" asp-format="{0:yyyy-MM-ddTHH:mm}" min="@now" />
                         <span asp-validation-for="StartDateTime" class="text-danger"></span>
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label asp-for="EndDateTime" class="form-label">Кінець</label>
-                        <input asp-for="EndDateTime" type="datetime-local" class="form-control" min="@now" />
+                        <input asp-for="EndDateTime" type="datetime-local" class="form-control" asp-format="{0:yyyy-MM-ddTHH:mm}" min="@now" />
                         <span asp-validation-for="EndDateTime" class="text-danger"></span>
                     </div>
                 </div>

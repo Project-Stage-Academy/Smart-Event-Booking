@@ -28,6 +28,8 @@ public class Event
             throw new ArgumentException("Title cannot be empty.", nameof(title));
         if (totalCapacity <= 0)
             throw new ArgumentException("Capacity must be greater than zero.", nameof(totalCapacity));
+        if (startDateTime < DateTime.Now)
+            throw new ArgumentException("Start date cannot be in the past.", nameof(startDateTime));
         if (startDateTime >= endDateTime)
             throw new ArgumentException("Start date must be before end date.", nameof(startDateTime));
         if (price < 0)
@@ -93,6 +95,9 @@ public class Event
 
         if (totalCapacity <= 0)
             throw new ArgumentException("Capacity must be greater than zero.", nameof(totalCapacity));
+
+        if (startDateTime < DateTime.Now)
+            throw new ArgumentException("Start date cannot be in the past.", nameof(startDateTime));
 
         if (startDateTime >= endDateTime)
             throw new ArgumentException("Start date must be before end date.", nameof(startDateTime));
