@@ -28,8 +28,8 @@ public static class DependencyInjection
             .BindConfiguration(DatabaseSettings.SectionName)
             .Validate(options => !string.IsNullOrWhiteSpace(options.Server), "Database:Server is required.")
             .Validate(options => !string.IsNullOrWhiteSpace(options.Name), "Database:Name is required.")
-            //.Validate(options => !string.IsNullOrWhiteSpace(options.User), "Database:User is required.")
-            //.Validate(options => !string.IsNullOrWhiteSpace(options.Password), "Database:Password is required.")
+            .Validate(options => !string.IsNullOrWhiteSpace(options.User), "Database:User is required.")
+            .Validate(options => !string.IsNullOrWhiteSpace(options.Password), "Database:Password is required.")
             .ValidateOnStart();
 
         services.AddDbContext<ApplicationDbContext>((sp, options) =>
