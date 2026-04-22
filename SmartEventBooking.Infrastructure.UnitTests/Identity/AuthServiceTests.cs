@@ -29,6 +29,10 @@ public class AuthServiceTests
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _loggerMock = new Mock<ILogger<AuthService>>();
 
+        _unitOfWorkMock
+            .Setup(x => x.ExecuteWithStrategyAsync(It.IsAny<Func<Task<AuthResultDto>>>(), default))
+            .Returns((Func<Task<AuthResultDto>> operation, CancellationToken _) => operation());
+
         _authService = new AuthService(
             _userManagerMock.Object,
             _signInManagerMock.Object,
@@ -84,6 +88,7 @@ public class AuthServiceTests
         addedDomainUser.Id.Should().Be(createdUser.Id);
 
         _userRepositoryMock.Verify(x => x.Add(It.IsAny<User>()), Times.Once);
+        _unitOfWorkMock.Verify(x => x.ExecuteWithStrategyAsync(It.IsAny<Func<Task<AuthResultDto>>>(), default), Times.Once);
         _unitOfWorkMock.Verify(x => x.BeginTransactionAsync(default), Times.Once);
         _unitOfWorkMock.Verify(x => x.CommitTransactionAsync(default), Times.Once);
         _signInManagerMock.Verify(x => x.SignInAsync(createdUser, false, null), Times.Once);
@@ -117,6 +122,7 @@ public class AuthServiceTests
         result.Succeeded.Should().BeFalse();
         result.Errors.Should().ContainSingle().Which.Should().Be("Role assignment failed");
 
+        _unitOfWorkMock.Verify(x => x.ExecuteWithStrategyAsync(It.IsAny<Func<Task<AuthResultDto>>>(), default), Times.Once);
         _unitOfWorkMock.Verify(x => x.BeginTransactionAsync(default), Times.Once);
         _unitOfWorkMock.Verify(x => x.RollbackTransactionAsync(default), Times.Once);
         _userRepositoryMock.Verify(x => x.Add(It.IsAny<User>()), Times.Never);
@@ -149,6 +155,7 @@ public class AuthServiceTests
         result.Succeeded.Should().BeFalse();
         result.Errors.Should().ContainSingle().Which.Should().Be("Password is too weak");
 
+        _unitOfWorkMock.Verify(x => x.ExecuteWithStrategyAsync(It.IsAny<Func<Task<AuthResultDto>>>(), default), Times.Once);
         _unitOfWorkMock.Verify(x => x.BeginTransactionAsync(default), Times.Once);
         _unitOfWorkMock.Verify(x => x.RollbackTransactionAsync(default), Times.Once);
         _userManagerMock.Verify(x => x.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);

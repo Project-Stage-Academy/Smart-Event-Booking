@@ -34,69 +34,80 @@ namespace SmartEventBooking.Infrastructure.Identity
         {
             _logger.LogInformation("Starting registration for user {Email}", dto.Email);
 
-            await _unitOfWork.BeginTransactionAsync();
+            ApplicationUser? createdUser = null;
 
-            try
+            var result = await _unitOfWork.ExecuteWithStrategyAsync(async () =>
             {
-                var appUser = new ApplicationUser
-                {
-                    Id = Guid.NewGuid(),
-                    UserName = dto.Email,
-                    Email = dto.Email
-                };
+                await _unitOfWork.BeginTransactionAsync();
 
-                var result = await _userManager.CreateAsync(appUser, dto.Password);
-
-                if (!result.Succeeded)
+                try
                 {
-                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                    _logger.LogWarning("Identity user creation failed for {Email}: {Errors}", dto.Email, errors);
-                    
-                    await _unitOfWork.RollbackTransactionAsync();
-                    return new AuthResultDto
+                    var appUser = new ApplicationUser
                     {
-                        Succeeded = false,
-                        Errors = result.Errors.Select(e => e.Description)
+                        Id = Guid.NewGuid(),
+                        UserName = dto.Email,
+                        Email = dto.Email
                     };
+
+                    createdUser = appUser;
+
+                    var result = await _userManager.CreateAsync(appUser, dto.Password);
+
+                    if (!result.Succeeded)
+                    {
+                        var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                        _logger.LogWarning("Identity user creation failed for {Email}: {Errors}", dto.Email, errors);
+
+                        await _unitOfWork.RollbackTransactionAsync();
+                        return new AuthResultDto
+                        {
+                            Succeeded = false,
+                            Errors = result.Errors.Select(e => e.Description)
+                        };
+                    }
+
+                    var addToRoleResult = await _userManager.AddToRoleAsync(appUser, RoleConstants.User);
+                    if (!addToRoleResult.Succeeded)
+                    {
+                        var errors = string.Join(", ", addToRoleResult.Errors.Select(e => e.Description));
+                        _logger.LogWarning("Adding user {Email} to role failed: {Errors}", dto.Email, errors);
+
+                        await _unitOfWork.RollbackTransactionAsync();
+                        return new AuthResultDto
+                        {
+                            Succeeded = false,
+                            Errors = addToRoleResult.Errors.Select(e => e.Description)
+                        };
+                    }
+
+                    var domainUser = new User
+                    {
+                        Id = appUser.Id,
+                        FirstName = dto.FirstName,
+                        LastName = dto.LastName
+                    };
+                    _userRepository.Add(domainUser);
+
+                    await _unitOfWork.CommitTransactionAsync();
+
+                    _logger.LogInformation("User {Email} registered successfully", dto.Email);
+                }
+                catch (Exception ex)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    _logger.LogError(ex, "An error occurred during registration for user {Email}", dto.Email);
+                    throw;
                 }
 
-                var addToRoleResult = await _userManager.AddToRoleAsync(appUser, RoleConstants.User);
-                if (!addToRoleResult.Succeeded)
-                {
-                    var errors = string.Join(", ", addToRoleResult.Errors.Select(e => e.Description));
-                    _logger.LogWarning("Adding user {Email} to role failed: {Errors}", dto.Email, errors);
+                return new AuthResultDto { Succeeded = true };
+            });
 
-                    await _unitOfWork.RollbackTransactionAsync();
-                    return new AuthResultDto
-                    {
-                        Succeeded = false,
-                        Errors = addToRoleResult.Errors.Select(e => e.Description)
-                    };
-                }
-
-                var domainUser = new User
-                {
-                    Id = appUser.Id,
-                    FirstName = dto.FirstName,
-                    LastName = dto.LastName
-                };
-                _userRepository.Add(domainUser);
-                
-                // Sign-in before commit to ensure the process is atomic.
-                // If sign-in fails, the transaction will be rolled back.
-                await _signInManager.SignInAsync(appUser, isPersistent: false);
-                
-                await _unitOfWork.CommitTransactionAsync();
-                
-                _logger.LogInformation("User {Email} registered successfully", dto.Email);
-            }
-            catch (Exception ex)
+            if (result.Succeeded && createdUser is not null)
             {
-                _logger.LogError(ex, "An error occurred during registration for user {Email}", dto.Email);
-                throw;
+                await _signInManager.SignInAsync(createdUser, isPersistent: false);
             }
 
-            return new AuthResultDto { Succeeded = true };
+            return result;
         }
     }
 }
