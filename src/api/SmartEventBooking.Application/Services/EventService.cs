@@ -34,7 +34,8 @@ namespace SmartEventBooking.Application.Services
                 Categories = e.EventCategories?.Select(ec => ec.Category.Name).ToList() ?? new List<string>(),
                 StartDateTime = e.StartDateTime,
                 EndDateTime = e.EndDateTime,
-                Price = e.Price
+                Price = e.Price,
+                Venue = e.Venue != null ? new VenueDto { Id = e.Venue.Id, Name = e.Venue.Name, Address = e.Venue.Location } : null
             }).ToList();
 
             return new PaginatedListDto<EventDto>
@@ -59,7 +60,8 @@ namespace SmartEventBooking.Application.Services
                 Categories = e.EventCategories.Select(ec => ec.Category.Name).ToList(),
                 StartDateTime = e.StartDateTime,
                 EndDateTime = e.EndDateTime,
-                Price = e.Price
+                Price = e.Price,
+                Venue = e.Venue != null ? new VenueDto { Id = e.Venue.Id, Name = e.Venue.Name, Address = e.Venue.Location } : null
             }).ToList();
 
             return new PaginatedListDto<EventDto>
@@ -90,7 +92,9 @@ namespace SmartEventBooking.Application.Services
                 AvailableSeats = ev.AvailableSeats, 
                 Price = ev.Price,
                 Status = ev.Status,
-                VenueId = ev.VenueId
+                VenueId = ev.VenueId,
+                Venue = ev.Venue != null ? new VenueDto { Id = ev.Venue.Id, Name = ev.Venue.Name, Address = ev.Venue.Location } : null,
+                Categories = ev.EventCategories != null ? ev.EventCategories.Select(ec => ec.Category.Name).ToList() : new List<string>()
             };
         }
 

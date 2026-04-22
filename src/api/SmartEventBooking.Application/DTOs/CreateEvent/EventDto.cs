@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using SmartEventBooking.Application.DTOs.Venue;
 
 namespace SmartEventBooking.Application.DTOs.Event
 {
@@ -12,5 +13,6 @@ namespace SmartEventBooking.Application.DTOs.Event
         public DateTime StartDateTime { get; set; }
         public DateTime EndDateTime { get; set; }
         public decimal Price { get; set; }
+        public VenueDto Venue { get; set; }
     }
 }

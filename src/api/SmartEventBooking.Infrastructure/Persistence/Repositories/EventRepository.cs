@@ -16,7 +16,11 @@ public class EventRepository : IEventRepository
 
     public async Task<Event?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _context.Events.FindAsync(new object[] { id }, cancellationToken);
+        return await _context.Events
+            .Include(e => e.Venue)
+            .Include(e => e.EventCategories)
+                .ThenInclude(ec => ec.Category)
+            .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
     }
 
     public async Task<IEnumerable<Event>> GetAllAsync(int skip, int take, CancellationToken cancellationToken = default)

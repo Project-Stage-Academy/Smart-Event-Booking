@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using SmartEventBooking.Domain.Enums;
 using System.Text;
+using SmartEventBooking.Application.DTOs.Venue;
 
 namespace SmartEventBooking.Application.DTOs.Detail
 {
@@ -19,6 +20,8 @@ namespace SmartEventBooking.Application.DTOs.Detail
         public decimal Price { get; set; }
         public EventStatus Status { get; set; }
         public Guid VenueId { get; set; }
+        public VenueDto Venue { get; set; }
+        public List<string> Categories { get; set; } = new List<string>();
     }
 
 
