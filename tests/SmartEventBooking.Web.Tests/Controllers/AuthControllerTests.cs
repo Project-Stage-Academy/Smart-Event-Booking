@@ -97,5 +97,74 @@ namespace SmartEventBooking.Web.Tests.Controllers
                 .Should().ContainSingle()
                 .Which.ErrorMessage.Should().Be("Error 1");
         }
+
+        [Fact]
+        public async Task Login_ReturnsViewResult_WhenNotAuthenticated()
+        {
+            var result = _controller.Login();
+
+            result.Should().BeOfType<ViewResult>();
+        }
+
+        [Fact]
+        public async Task Login_Post_ReturnsViewResult_WhenModelStateIsInvalid()
+        {
+            _controller.ModelState.AddModelError("Email", "Required");
+            var dto = new LoginDto 
+            { 
+                Email = "", 
+                Password = "123",
+                RememberMe = true 
+            };
+
+            var result = await _controller.Login(dto);
+
+            result.Should().BeOfType<ViewResult>();
+            var viewResult = result as ViewResult;
+            viewResult?.Model.Should().Be(dto);
+        }
+
+        [Fact]
+        public async Task Login_Post_RedirectsToHome_WhenRegistrationSucceeds()
+        {
+            var dto = new LoginDto
+            {
+                Email = "test@test.com",
+                Password = "Password123!",
+                RememberMe = true
+            };
+
+            _authServiceMock.Setup(x => x.LoginAsync(dto))
+                .ReturnsAsync(new AuthResultDto { Succeeded = true });
+
+            var result = await _controller.Login(dto);
+
+            result.Should().BeOfType<RedirectToActionResult>();
+            var redirectResult = result as RedirectToActionResult;
+            redirectResult?.ActionName.Should().Be("Index");
+            redirectResult?.ControllerName.Should().Be("Home");
+        }
+
+        [Fact]
+        public async Task Login_Post_ReturnsViewWithErrors_WhenLoginFails()
+        {
+            var dto = new LoginDto
+            {
+                Email = "test@test.com",
+                Password = "Password123!",
+                RememberMe = true
+            };
+
+            _authServiceMock.Setup(x => x.LoginAsync(dto))
+                .ReturnsAsync(new AuthResultDto { Succeeded = false, Errors = new[] { "Error 1" } });
+
+            var result = await _controller.Login(dto);
+
+            result.Should().BeOfType<ViewResult>();
+            _controller.ModelState.IsValid.Should().BeFalse();
+            _controller.ModelState.Values.SelectMany(v => v.Errors)
+                .Should().ContainSingle()
+                .Which.ErrorMessage.Should().Be("Error 1");
+        }
     }
 }
