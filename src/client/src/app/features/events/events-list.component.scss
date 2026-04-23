@@ -56,10 +56,6 @@
   background-color: #5a6268;
 }
 
-.events-table-wrapper {
-  overflow-x: auto;
-}
-
 .events-table {
   width: 100%;
   border-collapse: collapse;
@@ -131,7 +127,7 @@
 
 .events-table-wrapper {
   overflow-x: auto;
-  margin-bottom: 80px; /* add space so the table is not hidden behind the fixed pagination */
+  margin-bottom: 80px; 
 }
 
 .pagination-footer {

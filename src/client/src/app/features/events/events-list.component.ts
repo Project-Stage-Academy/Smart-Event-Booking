@@ -71,8 +71,6 @@ export class EventsListComponent implements OnInit, OnDestroy {
         this.totalPages = response.totalPages || Math.ceil(this.totalCount / this.pageSize);
         
         this.isLoading = false;
-        this.cdr.detectChanges();
-        console.log('Data loaded successfully. isLoading is now:', this.isLoading);
       },
       error: (err) => {
         console.error('Error loading events:', err);
