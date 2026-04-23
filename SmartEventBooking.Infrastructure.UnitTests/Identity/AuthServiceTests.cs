@@ -300,4 +300,39 @@ public class AuthServiceTests
         result.Succeeded.Should().BeFalse();
         result.Errors.Should().ContainSingle().Which.Should().Be("Login failed.");
     }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task LoginAsync_ShouldPassRememberMeToPasswordSignIn(bool rememberMe)
+    {
+        var dto = new LoginDto
+        {
+            Email = "test@test.com",
+            Password = "Password123!",
+            RememberMe = rememberMe
+        };
+
+        var appUser = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = dto.Email,
+            UserName = dto.Email
+        };
+
+        _userManagerMock
+            .Setup(x => x.FindByEmailAsync(dto.Email))
+            .ReturnsAsync(appUser);
+
+        _signInManagerMock
+            .Setup(x => x.PasswordSignInAsync(appUser, dto.Password, rememberMe, true))
+            .ReturnsAsync(SignInResult.Success);
+
+        var result = await _authService.LoginAsync(dto);
+
+        result.Succeeded.Should().BeTrue();
+        _signInManagerMock.Verify(
+            x => x.PasswordSignInAsync(appUser, dto.Password, rememberMe, true),
+            Times.Once);
+    }
 }

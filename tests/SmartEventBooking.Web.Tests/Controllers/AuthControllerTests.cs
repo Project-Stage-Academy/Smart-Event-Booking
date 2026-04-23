@@ -166,5 +166,31 @@ namespace SmartEventBooking.Web.Tests.Controllers
                 .Should().ContainSingle()
                 .Which.ErrorMessage.Should().Be("Error 1");
         }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task Login_Post_ForwardsRememberMeToAuthService(bool rememberMe)
+        {
+            var dto = new LoginDto
+            {
+                Email = "test@test.com",
+                Password = "Password123!",
+                RememberMe = rememberMe
+            };
+
+            _authServiceMock
+                .Setup(x => x.LoginAsync(It.IsAny<LoginDto>()))
+                .ReturnsAsync(new AuthResultDto { Succeeded = true });
+
+            await _controller.Login(dto);
+
+            _authServiceMock.Verify(
+                x => x.LoginAsync(It.Is<LoginDto>(d =>
+                    d.Email == dto.Email &&
+                    d.Password == dto.Password &&
+                    d.RememberMe == rememberMe)),
+                Times.Once);
+        }
     }
 }
