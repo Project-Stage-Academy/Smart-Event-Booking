@@ -18,6 +18,16 @@ public class UnitOfWork : IUnitOfWork, IDisposable
         return await _context.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task<TResult> ExecuteWithStrategyAsync<TResult>(Func<Task<TResult>> operation, CancellationToken cancellationToken = default)
+    {
+        var strategy = _context.Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(
+            state: operation,
+            operation: static (_, op, _) => op(),
+            verifySucceeded: null,
+            cancellationToken: cancellationToken);
+    }
+
     public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
         if (_currentTransaction != null)
