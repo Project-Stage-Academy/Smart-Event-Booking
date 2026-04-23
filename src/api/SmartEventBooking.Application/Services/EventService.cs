@@ -8,7 +8,6 @@ using SmartEventBooking.Application.DTOs.Venue;
 using SmartEventBooking.Application.DTOs.Common;
 using SmartEventBooking.Domain.Entities;
 
-
 namespace SmartEventBooking.Application.Services
 {
     public class EventService : IEventService
@@ -57,7 +56,7 @@ namespace SmartEventBooking.Application.Services
             {
                 Id = e.Id,
                 Title = e.Title,
-                Categories = e.EventCategories.Select(ec => ec.Category.Name).ToList(),
+                Categories = e.EventCategories?.Select(ec => ec.Category.Name).ToList() ?? new List<string>(),
                 StartDateTime = e.StartDateTime,
                 EndDateTime = e.EndDateTime,
                 Price = e.Price,
@@ -189,6 +188,5 @@ namespace SmartEventBooking.Application.Services
 
             return true;
         }
-
     }
 }
