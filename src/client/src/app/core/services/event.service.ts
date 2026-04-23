@@ -4,13 +4,14 @@ import { Observable } from 'rxjs';
 import { Event } from '../models/event.model';
 import { PaginatedList } from '../models/paginated-list.model';
 import { EventSearchDto } from '../models/event-search.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EventService {
   private http = inject(HttpClient);
-  private apiUrl = 'https://localhost:7134/api/events';
+  private apiUrl = environment.apiUrl;
 
   getUpcomingEvents(page: number = 1, pageSize: number = 5, search?: EventSearchDto): Observable<PaginatedList<Event>> {
     let params = new HttpParams()
