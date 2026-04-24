@@ -44,6 +44,7 @@ export class EventsListComponent implements OnInit, OnDestroy {
     this.categorySubscription = this.categoryService.getCategories().subscribe({
       next: (response) => {
         this.categories = response;
+        this.cdr.detectChanges(); 
       },
       error: (err) => console.error('Failed to load categories', err)
     });
@@ -71,6 +72,7 @@ export class EventsListComponent implements OnInit, OnDestroy {
         this.totalPages = response.totalPages || Math.ceil(this.totalCount / this.pageSize);
         
         this.isLoading = false;
+        this.cdr.detectChanges(); 
       },
       error: (err) => {
         console.error('Error loading events:', err);
