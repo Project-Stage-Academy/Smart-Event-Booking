@@ -37,10 +37,10 @@
             <td>{{ event.title }}</td>
             <td class="category-cell" [title]="event.categories?.join(', ') || 'N/A'">{{ event.categories?.join(', ') || 'N/A' }}</td>
             <td>
-              <i class="icon-calendar"></i> {{ event.startDateTime | date: 'mediumDate' }}
+              <i class="bi bi-calendar-event"></i> {{ event.startDateTime | date: 'mediumDate' }}
             </td>
             <td>
-              <span *ngIf="event.venue"><i class="icon-location"></i> {{ event.venue.name }}</span>
+              <span *ngIf="event.venue"><i class="bi bi-geo-alt"></i> {{ event.venue.name }}</span>
               <span *ngIf="!event.venue">-</span>
             </td>
             <td>
@@ -54,7 +54,6 @@
         </tbody>
       </table>
 
-      <!-- Fixed Pagination Controls -->
       <div class="pagination-footer" *ngIf="totalPages > 1">
         <button [disabled]="currentPage === 1" (click)="prevPage()">Previous</button>
         <span class="pages-list">

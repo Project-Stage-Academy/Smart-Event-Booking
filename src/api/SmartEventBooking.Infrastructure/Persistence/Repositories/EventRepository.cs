@@ -25,7 +25,11 @@ public class EventRepository : IEventRepository
 
     public async Task<IEnumerable<Event>> GetAllAsync(int skip, int take, CancellationToken cancellationToken = default)
     {
-        return await _context.Events.OrderBy(e => e.Id).Skip(skip).Take(take).ToListAsync(cancellationToken);
+        return await _context.Events
+            .OrderBy(e => e.Id)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<int> GetCountAsync(CancellationToken cancellationToken = default)
@@ -35,36 +39,7 @@ public class EventRepository : IEventRepository
 
     public async Task<IEnumerable<Event>> GetUpcomingAsync(int skip, int take, EventSearchDto? searchDto = null, CancellationToken cancellationToken = default)
     {
-        var query = _context.Events.Where(e => e.StartDateTime >= DateTime.UtcNow);
-
-        if (searchDto != null)
-        {
-            if (!string.IsNullOrWhiteSpace(searchDto.Keyword))
-            {
-                var keyword = searchDto.Keyword.ToLower();
-                query = query.Where(e => e.Title.ToLower().Contains(keyword) || (e.Description != null && e.Description.ToLower().Contains(keyword)));
-            }
-
-            if (searchDto.CategoryId.HasValue)
-            {
-                query = query.Where(e => e.EventCategories.Any(ec => ec.CategoryId == searchDto.CategoryId.Value));
-            }
-            if (searchDto.StartDate.HasValue)
-            {
-                query = query.Where(e => e.StartDateTime >= searchDto.StartDate.Value);
-            }
-
-            if (searchDto.EndDate.HasValue)
-            {
-                query = query.Where(e => e.StartDateTime <= searchDto.EndDate.Value);
-            }
-
-            if (!string.IsNullOrWhiteSpace(searchDto.Location))
-            {
-                var loc = searchDto.Location.ToLower();
-                query = query.Where(e => e.Venue.Name.ToLower().Contains(loc) || (e.Venue.Location != null && e.Venue.Location.ToLower().Contains(loc)));
-            }
-        }
+        var query = ApplySearchFilters(searchDto);
 
         return await query
             .OrderBy(e => e.StartDateTime)
@@ -78,20 +53,29 @@ public class EventRepository : IEventRepository
 
     public async Task<int> GetUpcomingCountAsync(EventSearchDto? searchDto = null, CancellationToken cancellationToken = default)
     {
+        var query = ApplySearchFilters(searchDto);
+        return await query.CountAsync(cancellationToken);
+    }
+
+    // Extracted IQueryable helper to remove duplicated logic
+    private IQueryable<Event> ApplySearchFilters(EventSearchDto? searchDto)
+    {
         var query = _context.Events.Where(e => e.StartDateTime >= DateTime.UtcNow);
 
         if (searchDto != null)
         {
             if (!string.IsNullOrWhiteSpace(searchDto.Keyword))
             {
-                var keyword = searchDto.Keyword.ToLower();
-                query = query.Where(e => e.Title.ToLower().Contains(keyword) || (e.Description != null && e.Description.ToLower().Contains(keyword)));
+                var keyword = searchDto.Keyword;
+                query = query.Where(e => e.Title.Contains(keyword) || 
+                                        (e.Description != null && e.Description.Contains(keyword)));
             }
 
             if (searchDto.CategoryId.HasValue)
             {
                 query = query.Where(e => e.EventCategories.Any(ec => ec.CategoryId == searchDto.CategoryId.Value));
             }
+
             if (searchDto.StartDate.HasValue)
             {
                 query = query.Where(e => e.StartDateTime >= searchDto.StartDate.Value);
@@ -104,12 +88,13 @@ public class EventRepository : IEventRepository
 
             if (!string.IsNullOrWhiteSpace(searchDto.Location))
             {
-                var loc = searchDto.Location.ToLower();
-                query = query.Where(e => e.Venue.Name.ToLower().Contains(loc) || (e.Venue.Location != null && e.Venue.Location.ToLower().Contains(loc)));
+                var loc = searchDto.Location;
+                query = query.Where(e => e.Venue.Name.Contains(loc) || 
+                                        (e.Venue.Location != null && e.Venue.Location.Contains(loc)));
             }
         }
 
-        return await query.CountAsync(cancellationToken);
+        return query;
     }
 
     public void Add(Event @event)

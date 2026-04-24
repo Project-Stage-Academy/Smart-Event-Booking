@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using FluentValidation;
 using SmartEventBooking.Application.DTOs.CreateEvent;
 using SmartEventBooking.Application.DTOs.Event;
 using SmartEventBooking.Application.DTOs.UpdateEvent;
@@ -13,10 +14,12 @@ namespace SmartEventBooking.Web.Controllers;
 public class EventsController : ControllerBase
 {
     private readonly IEventService _service;
+    private readonly IValidator<CreateEventDto> _createValidator;
 
-    public EventsController(IEventService service)
+    public EventsController(IEventService service, IValidator<CreateEventDto> createValidator)
     {
         _service = service;
+        _createValidator = createValidator;
     }
 
     [HttpGet("upcoming")]
@@ -50,11 +53,12 @@ public class EventsController : ControllerBase
     [Authorize(Roles = RoleConstants.Admin)]
     public async Task<IActionResult> Create(CreateEventDto dto)
     {
-        if (dto.StartDateTime < DateTime.UtcNow)
-            return BadRequest("Start date cannot be in the past.");
+        var validationResult = await _createValidator.ValidateAsync(dto);
 
-        if (dto.EndDateTime <= dto.StartDateTime)
-            return BadRequest("End date must be after start date.");
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
 
         var id = await _service.CreateAsync(dto);
         return CreatedAtAction(nameof(GetById), new { id }, new { id });

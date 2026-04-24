@@ -14,6 +14,7 @@ namespace SmartEventBooking.Application.Services
     {
         public readonly IEventRepository _repository;
         private readonly IVenueRepository _venueRepository;
+        
         public EventService(IEventRepository repository, IVenueRepository venueRepository)
         {
             _repository = repository;
@@ -26,16 +27,7 @@ namespace SmartEventBooking.Application.Services
             var events = await _repository.GetAllAsync(skip, pageSize, cancellationToken);
             var totalCount = await _repository.GetCountAsync(cancellationToken);
 
-            var items = events.Select(e => new EventDto
-            {
-                Id = e.Id,
-                Title = e.Title,
-                Categories = e.EventCategories?.Select(ec => ec.Category.Name).ToList() ?? new List<string>(),
-                StartDateTime = e.StartDateTime,
-                EndDateTime = e.EndDateTime,
-                Price = e.Price,
-                Venue = e.Venue != null ? new VenueDto { Id = e.Venue.Id, Name = e.Venue.Name, Address = e.Venue.Location } : null
-            }).ToList();
+            var items = events.Select(MapToEventDto).ToList();
 
             return new PaginatedListDto<EventDto>
             {
@@ -52,16 +44,7 @@ namespace SmartEventBooking.Application.Services
             var events = await _repository.GetUpcomingAsync(skip, pageSize, searchDto, cancellationToken);
             var totalCount = await _repository.GetUpcomingCountAsync(searchDto, cancellationToken);
 
-            var items = events.Select(e => new EventDto
-            {
-                Id = e.Id,
-                Title = e.Title,
-                Categories = e.EventCategories?.Select(ec => ec.Category.Name).ToList() ?? new List<string>(),
-                StartDateTime = e.StartDateTime,
-                EndDateTime = e.EndDateTime,
-                Price = e.Price,
-                Venue = e.Venue != null ? new VenueDto { Id = e.Venue.Id, Name = e.Venue.Name, Address = e.Venue.Location } : null
-            }).ToList();
+            var items = events.Select(MapToEventDto).ToList();
 
             return new PaginatedListDto<EventDto>
             {
@@ -84,7 +67,7 @@ namespace SmartEventBooking.Application.Services
                 Id = ev.Id,
                 Title = ev.Title,
                 Description = ev.Description,
-                Banner = ev.Banner,                 
+                Banner = ev.Banner,                
                 StartDateTime = ev.StartDateTime,
                 EndDateTime = ev.EndDateTime,
                 TotalCapacity = ev.TotalCapacity,
@@ -93,7 +76,7 @@ namespace SmartEventBooking.Application.Services
                 Status = ev.Status,
                 VenueId = ev.VenueId,
                 Venue = ev.Venue != null ? new VenueDto { Id = ev.Venue.Id, Name = ev.Venue.Name, Address = ev.Venue.Location } : null,
-                Categories = ev.EventCategories != null ? ev.EventCategories.Select(ec => ec.Category.Name).ToList() : new List<string>()
+                Categories = GetCategoryNames(ev)
             };
         }
 
@@ -187,6 +170,25 @@ namespace SmartEventBooking.Application.Services
             await _repository.SaveChangesAsync(cancellationToken);
 
             return true;
+        }
+
+        private static EventDto MapToEventDto(Event e)
+        {
+            return new EventDto
+            {
+                Id = e.Id,
+                Title = e.Title,
+                Categories = GetCategoryNames(e),
+                StartDateTime = e.StartDateTime,
+                EndDateTime = e.EndDateTime,
+                Price = e.Price,
+                Venue = e.Venue != null ? new VenueDto { Id = e.Venue.Id, Name = e.Venue.Name, Address = e.Venue.Location } : null
+            };
+        }
+
+        private static List<string> GetCategoryNames(Event ev)
+        {
+            return ev.EventCategories?.Select(ec => ec.Category.Name).ToList() ?? new List<string>();
         }
     }
 }

@@ -1,7 +1,9 @@
 using DotNetEnv;
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using SmartEventBooking.Application;
 using SmartEventBooking.Application.Abstractions.CurrentUser;
+using SmartEventBooking.Application.Validators;
 using SmartEventBooking.Infrastructure;
 using SmartEventBooking.Infrastructure.Identity;
 using SmartEventBooking.Infrastructure.Persistence;
@@ -10,10 +12,10 @@ using SmartEventBooking.Web.Services;
 Env.TraversePath().NoClobber().Load();
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateEventDtoValidator>();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplicationServices();
 builder.Services
