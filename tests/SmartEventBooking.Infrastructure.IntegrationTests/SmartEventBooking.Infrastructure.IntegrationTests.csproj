@@ -22,10 +22,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\SmartEventBooking.Application\SmartEventBooking.Application.csproj" />
-    <ProjectReference Include="..\src\SmartEventBooking.Domain\SmartEventBooking.Domain.csproj" />
-    <ProjectReference Include="..\src\SmartEventBooking.Infrastructure\SmartEventBooking.Infrastructure.csproj" />
-    <ProjectReference Include="..\src\SmartEventBooking.Shared\SmartEventBooking.Shared.csproj" />
+    <ProjectReference Include="..\..\src\api\SmartEventBooking.Application\SmartEventBooking.Application.csproj" />
+    <ProjectReference Include="..\..\src\api\SmartEventBooking.Domain\SmartEventBooking.Domain.csproj" />
+    <ProjectReference Include="..\..\src\api\SmartEventBooking.Infrastructure\SmartEventBooking.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\api\SmartEventBooking.Shared\SmartEventBooking.Shared.csproj" />
   </ItemGroup>
 
 </Project>

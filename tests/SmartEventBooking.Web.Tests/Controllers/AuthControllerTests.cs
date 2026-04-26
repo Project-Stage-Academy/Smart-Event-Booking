@@ -1,101 +1,53 @@
+using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using FluentAssertions;
-using SmartEventBooking.Web.Controllers;
 using SmartEventBooking.Application.Abstractions.Identity;
 using SmartEventBooking.Application.DTOs.Auth;
-using Microsoft.AspNetCore.Http;
-using System.Security.Claims;
+using SmartEventBooking.Web.Controllers;
 
-namespace SmartEventBooking.Web.Tests.Controllers
+namespace SmartEventBooking.Web.Tests.Controllers;
+
+public class AuthControllerTests
 {
-    public class AuthControllerTests
+    private readonly Mock<IAuthService> _authServiceMock = new();
+
+    private AuthController CreateController() => new(_authServiceMock.Object);
+
+    [Fact]
+    public async Task Register_ReturnsOk_WhenRegistrationSucceeds()
     {
-        private readonly Mock<IAuthService> _authServiceMock;
-        private readonly AuthController _controller;
-
-        public AuthControllerTests()
+        var dto = new RegisterDto
         {
-            _authServiceMock = new Mock<IAuthService>();
-            _controller = new AuthController(_authServiceMock.Object);
+            Email = "test@example.com",
+            Password = "Password123!",
+            ConfirmPassword = "Password123!",
+            FirstName = "Ivan"
+        };
 
-            var user = new ClaimsPrincipal(new ClaimsIdentity());
-            _controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext { User = user }
-            };
-        }
+        _authServiceMock.Setup(x => x.RegisterAsync(dto))
+            .ReturnsAsync(new AuthResultDto { Succeeded = true });
 
-        [Fact]
-        public void Register_ReturnsViewResult_WhenNotAuthenticated()
+        var result = await CreateController().Register(dto);
+
+        result.Should().BeOfType<OkObjectResult>();
+    }
+
+    [Fact]
+    public async Task Register_ReturnsBadRequest_WhenRegistrationFails()
+    {
+        var dto = new RegisterDto
         {
-            var result = _controller.Register();
+            Email = "test@example.com",
+            Password = "Password123!",
+            ConfirmPassword = "Password123!",
+            FirstName = "Ivan"
+        };
 
-            result.Should().BeOfType<ViewResult>();
-        }
+        _authServiceMock.Setup(x => x.RegisterAsync(dto))
+            .ReturnsAsync(new AuthResultDto { Succeeded = false, Errors = ["Email already taken"] });
 
-        [Fact]
-        public async Task Register_Post_ReturnsViewResult_WhenModelStateIsInvalid()
-        {
-            _controller.ModelState.AddModelError("Email", "Required");
-            var dto = new RegisterDto 
-            { 
-                Email = "", 
-                Password = "123", 
-                ConfirmPassword = "123", 
-                FirstName = "Test" 
-            };
+        var result = await CreateController().Register(dto);
 
-            var result = await _controller.Register(dto);
-
-            result.Should().BeOfType<ViewResult>();
-            var viewResult = result as ViewResult;
-            viewResult?.Model.Should().Be(dto);
-        }
-
-        [Fact]
-        public async Task Register_Post_RedirectsToHome_WhenRegistrationSucceeds()
-        {
-            var dto = new RegisterDto
-            {
-                Email = "test@test.com",
-                Password = "Password123!",
-                ConfirmPassword = "Password123!",
-                FirstName = "Ivan"
-            };
-
-            _authServiceMock.Setup(x => x.RegisterAsync(dto))
-                .ReturnsAsync(new AuthResultDto { Succeeded = true });
-
-            var result = await _controller.Register(dto);
-
-            result.Should().BeOfType<RedirectToActionResult>();
-            var redirectResult = result as RedirectToActionResult;
-            redirectResult?.ActionName.Should().Be("Index");
-            redirectResult?.ControllerName.Should().Be("Home");
-        }
-
-        [Fact]
-        public async Task Register_Post_ReturnsViewWithErrors_WhenRegistrationFails()
-        {
-            var dto = new RegisterDto
-            {
-                Email = "test@test.com",
-                Password = "Password123!",
-                ConfirmPassword = "Password123!",
-                FirstName = "Ivan"
-            };
-
-            _authServiceMock.Setup(x => x.RegisterAsync(dto))
-                .ReturnsAsync(new AuthResultDto { Succeeded = false, Errors = new[] { "Error 1" } });
-
-            var result = await _controller.Register(dto);
-
-            result.Should().BeOfType<ViewResult>();
-            _controller.ModelState.IsValid.Should().BeFalse();
-            _controller.ModelState.Values.SelectMany(v => v.Errors)
-                .Should().ContainSingle()
-                .Which.ErrorMessage.Should().Be("Error 1");
-        }
+        result.Should().BeOfType<BadRequestObjectResult>();
     }
 }
