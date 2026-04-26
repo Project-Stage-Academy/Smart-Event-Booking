@@ -1,0 +1,21 @@
+@model SmartEventBooking.Web.Models.ErrorViewModel
+@{
+    ViewData["Title"] = "Error";
+}
+
+<div class="text-center">
+    <h1 class="display-1 fw-bold text-danger">Error</h1>
+    <p class="fs-3"> <span class="text-danger">Oops!</span> Something went wrong.</p>
+    <p class="lead">
+        An unexpected error occurred while processing your request.
+    </p>
+
+    @if (Model.ShowRequestId)
+    {
+        <p>
+            <strong>Request ID:</strong> <code>@Model.RequestId</code>
+        </p>
+    }
+
+    <a href="/" class="btn btn-primary">Go Home</a>
+</div>

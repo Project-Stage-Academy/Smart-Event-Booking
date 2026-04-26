@@ -1,0 +1,53 @@
+import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
+
+@Component({
+  selector: 'app-server-error',
+  standalone: true,
+  imports: [RouterLink],
+  template: `
+    <div class="error-container">
+      <h1 class="error-code">Error</h1>
+      <p class="error-message">Oops! Something went wrong.</p>
+      <p class="error-description">
+        An unexpected error occurred while processing your request.
+      </p>
+      <a routerLink="/" class="btn-home">Go Home</a>
+    </div>
+  `,
+  styles: [`
+    .error-container {
+      text-align: center;
+      padding: 100px 20px;
+      font-family: sans-serif;
+    }
+    .error-code {
+      font-size: 80px;
+      font-weight: bold;
+      color: #dc3545;
+      margin: 0;
+    }
+    .error-message {
+      font-size: 24px;
+      margin: 10px 0;
+    }
+    .error-description {
+      font-size: 18px;
+      color: #6c757d;
+      margin-bottom: 30px;
+    }
+    .btn-home {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    .btn-home:hover {
+      background-color: #0056b3;
+    }
+  `]
+})
+export class ServerErrorComponent {}
