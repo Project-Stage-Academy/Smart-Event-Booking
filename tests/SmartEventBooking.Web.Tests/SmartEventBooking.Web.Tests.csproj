@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\SmartEventBooking.Web\SmartEventBooking.Web.csproj" />
+    <ProjectReference Include="..\..\src\api\SmartEventBooking.Web\SmartEventBooking.Web.csproj" />
   </ItemGroup>
 
 </Project>

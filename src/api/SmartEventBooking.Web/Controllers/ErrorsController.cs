@@ -1,26 +1,22 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using SmartEventBooking.Web.Models;
 
 namespace SmartEventBooking.Web.Controllers;
 
-public class ErrorsController : Controller
+[ApiController]
+[ApiExplorerSettings(IgnoreApi = true)]
+public class ErrorsController : ControllerBase
 {
     [Route("Errors/{statusCode}")]
     public IActionResult HandleStatusCode(int statusCode)
     {
         return statusCode switch
         {
-            400 => View("BadRequest"),
-            403 => View("Forbidden"),
-            404 => View("NotFound"),
-            _ => View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier })
+            400 => Problem(title: "Bad Request", statusCode: 400),
+            401 => Problem(title: "Unauthorized", statusCode: 401),
+            403 => Problem(title: "Forbidden", statusCode: 403),
+            404 => Problem(title: "Not Found", statusCode: 404),
+            _ => Problem(title: "An unexpected error occurred", statusCode: statusCode)
         };
-    }
-
-    [Route("Errors/Error")]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }

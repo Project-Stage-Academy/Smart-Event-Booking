@@ -12,7 +12,7 @@ using SmartEventBooking.Web.Services;
 Env.TraversePath().NoClobber().Load();
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateEventDtoValidator>();
@@ -50,7 +50,7 @@ await app.InitialiseDatabaseAsync();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Errors/Error");
+    app.UseExceptionHandler("/Errors/500");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
