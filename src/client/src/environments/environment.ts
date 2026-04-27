@@ -1,4 +1,3 @@
 export const environment = {
-  production: true,
-  apiUrl: 'https://localhost:7134/api/events'
+  production: true
 };

@@ -7,8 +7,8 @@ on:
       - main
 
 jobs:
-  build-and-test:
-    name: Build and Test
+  build-and-test-api:
+    name: API Validation
     runs-on: ubuntu-latest
 
     steps:
@@ -29,5 +29,35 @@ jobs:
       - name: Run Unit & Integration Tests
         run: dotnet test --no-build --configuration Release --verbosity normal
 
-      - name: Verify Dockerfile builds successfully
-        run: docker build -t smarteventbooking:test -f src/api/SmartEventBooking.Web/Dockerfile .
+      - name: Verify API Dockerfile builds
+        run: docker build -t smarteventbooking-api:test -f src/api/SmartEventBooking.Web/Dockerfile .
+
+
+  build-and-test-client:
+    name: Client UI Validation
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./src/client
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: src/client/.nvmrc
+          cache: 'npm'
+          cache-dependency-path: ./src/client/package-lock.json
+        
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build Angular project
+        run: npm run build -- --configuration production
+
+      - name: Verify Client Dockerfile builds
+        working-directory: .
+        run: docker build -t smarteventbooking-client:test src/client/
