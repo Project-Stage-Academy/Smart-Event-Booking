@@ -27,4 +27,16 @@ public class AuthController : ControllerBase
 
         return BadRequest(result.Errors);
     }
+
+    [HttpGet("access-denied")]
+    public IActionResult AccessDenied()
+    {
+        return Forbid();
+    }
+
+    [HttpGet("login")]
+    public IActionResult Login()
+    {
+        return Ok(new { message = "Будь ласка, увійдіть в систему" });
+    }
 }

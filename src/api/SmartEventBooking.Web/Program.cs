@@ -72,6 +72,8 @@ app.MapGet("/health/db", async (ApplicationDbContext dbContext, CancellationToke
         : Results.Problem("Database connection failed.", statusCode: StatusCodes.Status503ServiceUnavailable);
 });
 
+app.MapControllers();
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
