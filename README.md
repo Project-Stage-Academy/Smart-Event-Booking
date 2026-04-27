@@ -51,7 +51,7 @@ dotnet ef database update --project src/SmartEventBooking.Infrastructure/SmartEv
 ## 4) Run the app
 
 ```bash
-dotnet run --project src/SmartEventBooking.Web/SmartEventBooking.Web.csproj --launch-profile https
+dotnet run --project src/api/SmartEventBooking.Web/SmartEventBooking.Web.csproj --launch-profile https
 ```
 
 Default URLs (development):
