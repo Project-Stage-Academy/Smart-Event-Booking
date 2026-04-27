@@ -1,13 +1,20 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
 namespace SmartEventBooking.Web.Controllers;
 
+/// <summary>
+/// Controller for handling HTTP errors and returning RFC 7807 problem details.
+/// </summary>
 [ApiController]
-[ApiExplorerSettings(IgnoreApi = true)]
 public class ErrorsController : ControllerBase
 {
+    /// <summary>
+    /// Handles the specified HTTP status code and returns a problem detail response.
+    /// </summary>
+    /// <param name="statusCode">The HTTP status code to handle.</param>
+    /// <returns>An <see cref="IActionResult"/> with RFC 7807 problem details.</returns>
     [Route("Errors/{statusCode}")]
+    [HttpGet]
     public IActionResult HandleStatusCode(int statusCode)
     {
         return statusCode switch
