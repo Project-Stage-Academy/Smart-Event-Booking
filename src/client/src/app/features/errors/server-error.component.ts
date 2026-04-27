@@ -7,7 +7,7 @@ import { RouterLink } from '@angular/router';
   imports: [RouterLink],
   template: `
     <div class="error-container">
-      <h1 class="error-code server-error">Error</h1>
+      <h1 class="error-code server-error">500</h1>
       <p class="error-message">Oops! Something went wrong.</p>
       <p class="error-description">
         An unexpected error occurred while processing your request.
