@@ -71,6 +71,7 @@ To start a local development server for the frontend, navigate to the client dir
 
 ```bash
 cd src/client
+npm install
 ng serve
 ```
 
