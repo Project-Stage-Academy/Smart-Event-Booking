@@ -1,8 +1,14 @@
 name: Release to Production
 
+# on:
+#  push:
+#    branches: [ main ]
+
 on:
- push:
-   branches: [ main ]
+  pull_request:
+    branches:
+      - develop
+      - main
 
 env:
   API_IMAGE: smart-event-booking-api-app
@@ -11,7 +17,22 @@ env:
   AZURE_WEBAPP_CLIENT_NAME: app-smarteventbooking-client
 
 jobs:
+  run-tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Run API tests
+        run: dotnet test --configuration Release --verbosity normal
+
   build-and-push:
+    needs: run-tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -59,6 +80,11 @@ jobs:
           publish-profile: ${{ secrets.AZURE_API_PUBLISH_PROFILE }}
           images: '${{ secrets.DOCKERHUB_USERNAME }}/${{ env.API_IMAGE }}:${{ github.sha }}'
 
+      - name: Smoke test API
+        run: |
+          curl --retry 10 --retry-delay 10 --retry-connrefused --fail \
+            https://${{ env.AZURE_WEBAPP_API_NAME }}.azurewebsites.net/health/db
+
   deploy-client:
     needs: build-and-push
     runs-on: ubuntu-latest
@@ -69,3 +95,8 @@ jobs:
           app-name: ${{ env.AZURE_WEBAPP_CLIENT_NAME }}
           publish-profile: ${{ secrets.AZURE_CLIENT_PUBLISH_PROFILE }}
           images: '${{ secrets.DOCKERHUB_USERNAME }}/${{ env.CLIENT_IMAGE }}:${{ github.sha }}'
+
+      - name: Smoke test Client
+        run: |
+          curl --retry 10 --retry-delay 10 --retry-connrefused --fail \
+            https://${{ env.AZURE_WEBAPP_CLIENT_NAME }}.azurewebsites.net
