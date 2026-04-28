@@ -1,5 +1,4 @@
 using FluentAssertions;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging.Abstractions;
 using SmartEventBooking.Web.Controllers;
@@ -18,7 +17,7 @@ public class HomeControllerTests
         };
 
     [Fact]
-    public void Index_ReturnsOk()
+    public void Index_ReturnsOkResult()
     {
         var result = CreateController().Index();
 
@@ -26,7 +25,7 @@ public class HomeControllerTests
     }
 
     [Fact]
-    public void Privacy_ReturnsOk()
+    public void Privacy_ReturnsOkResult()
     {
         var result = CreateController().Privacy();
 

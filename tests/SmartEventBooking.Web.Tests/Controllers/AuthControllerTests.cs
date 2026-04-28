@@ -1,17 +1,30 @@
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using SmartEventBooking.Application.Abstractions.Identity;
 using SmartEventBooking.Application.DTOs.Auth;
 using SmartEventBooking.Web.Controllers;
+using System.Security.Claims;
 
 namespace SmartEventBooking.Web.Tests.Controllers;
 
 public class AuthControllerTests
 {
-    private readonly Mock<IAuthService> _authServiceMock = new();
+    private readonly Mock<IAuthService> _authServiceMock;
+    private readonly AuthController _controller;
 
-    private AuthController CreateController() => new(_authServiceMock.Object);
+    public AuthControllerTests()
+    {
+        _authServiceMock = new Mock<IAuthService>();
+        _controller = new AuthController(_authServiceMock.Object);
+
+        var user = new ClaimsPrincipal(new ClaimsIdentity());
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = user }
+        };
+    }
 
     [Fact]
     public async Task Register_ReturnsOk_WhenRegistrationSucceeds()
@@ -27,7 +40,7 @@ public class AuthControllerTests
         _authServiceMock.Setup(x => x.RegisterAsync(dto))
             .ReturnsAsync(new AuthResultDto { Succeeded = true });
 
-        var result = await CreateController().Register(dto);
+        var result = await _controller.Register(dto);
 
         result.Should().BeOfType<OkObjectResult>();
     }
@@ -46,8 +59,11 @@ public class AuthControllerTests
         _authServiceMock.Setup(x => x.RegisterAsync(dto))
             .ReturnsAsync(new AuthResultDto { Succeeded = false, Errors = ["Email already taken"] });
 
-        var result = await CreateController().Register(dto);
+        var result = await _controller.Register(dto);
 
         result.Should().BeOfType<BadRequestObjectResult>();
+        
+        var badRequestResult = result as BadRequestObjectResult;
+        (badRequestResult?.Value as IEnumerable<string>).Should().Contain("Email already taken");
     }
 }
