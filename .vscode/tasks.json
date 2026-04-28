@@ -35,7 +35,8 @@
                 "--project",
                 "${workspaceFolder}/src/api/SmartEventBooking.Web/SmartEventBooking.Web.csproj"
             ],
-            "problemMatcher": "$msCompile"
+            "problemMatcher": "$msCompile",
+            "isBackground": true
         }
     ]
 }

@@ -74,10 +74,4 @@ app.MapGet("/health/db", async (ApplicationDbContext dbContext, CancellationToke
 
 app.MapControllers();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
-
-
 app.Run();

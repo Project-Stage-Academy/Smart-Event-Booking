@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartEventBooking.Application.Abstractions.Identity;
 using SmartEventBooking.Application.DTOs.Auth;
@@ -29,14 +30,21 @@ public class AuthController : ControllerBase
     }
 
     [HttpGet("access-denied")]
+    [AllowAnonymous]
     public IActionResult AccessDenied()
     {
-        return Forbid();
+        return StatusCode(403, new 
+        { 
+            message = "You do not have permission to access this resource",
+            status = 403,
+            error = "Forbidden"
+        });
     }
 
     [HttpGet("login")]
+    [AllowAnonymous]
     public IActionResult Login()
     {
-        return Ok(new { message = "Будь ласка, увійдіть в систему" });
+        return Ok(new { message = "Please, log in to the system" });
     }
 }

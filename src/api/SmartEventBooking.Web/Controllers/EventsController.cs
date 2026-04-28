@@ -9,7 +9,6 @@ using SmartEventBooking.Domain.Constants;
 
 namespace SmartEventBooking.Web.Controllers;
 
-[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class EventsController : ControllerBase
@@ -24,6 +23,7 @@ public class EventsController : ControllerBase
     }
 
     [HttpGet("upcoming")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetUpcoming([FromQuery] int page = 1, [FromQuery] int pageSize = 5, [FromQuery] EventSearchDto? searchDto = null)
     {
         var result = await _service.GetUpcomingAsync(page, pageSize, searchDto);
@@ -31,6 +31,7 @@ public class EventsController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 5)
     {
         var result = await _service.GetAllAsync(page, pageSize);
@@ -38,6 +39,7 @@ public class EventsController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetById(Guid id)
     {
         var eventDto = await _service.GetByIdAsync(id);
