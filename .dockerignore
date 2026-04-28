@@ -7,3 +7,6 @@
 **/bin
 **/obj
 **/Dockerfile
+**/node_modules
+**/dist
+**/.angular

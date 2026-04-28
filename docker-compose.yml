@@ -18,7 +18,7 @@ services:
       start_period: 10s
 
   api:
-    image: smart-event-api:latest
+    image: smart-event-booking-api:latest
     build:
       context: .
       dockerfile: src/api/SmartEventBooking.Web/Dockerfile
