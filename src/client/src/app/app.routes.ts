@@ -10,8 +10,25 @@ export const routes: Routes = [
     loadComponent: () => import('./features/events/event-details/event-details.component').then(m => m.EventDetailsComponent)
   },
   {
+    path: 'forbidden',
+    loadComponent: () => import('./features/errors/forbidden.component').then(m => m.ForbiddenComponent)
+  },
+  {
+    path: 'server-error',
+    loadComponent: () => import('./features/errors/server-error.component').then(m => m.ServerErrorComponent)
+  },
+  {
+    path: 'not-found',
+    loadComponent: () => import('./features/errors/not-found.component').then(m => m.NotFoundComponent)
+  },
+  {
     path: '',
     redirectTo: 'events',
+    pathMatch: 'full'
+  },
+  {
+    path: '**',
+    redirectTo: 'not-found',
     pathMatch: 'full'
   }
 ];

@@ -12,7 +12,7 @@ using SmartEventBooking.Web.Services;
 Env.TraversePath().NoClobber().Load();
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateEventDtoValidator>();
@@ -27,7 +27,7 @@ builder.Services
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Auth/Register";
-    options.AccessDeniedPath = "/Auth/AccessDenied";
+    options.AccessDeniedPath = "/Errors/403";
 
     options.Cookie.Name = "SmartEventBooking.Auth";
     options.ExpireTimeSpan = TimeSpan.FromDays(7);
@@ -50,10 +50,12 @@ await app.InitialiseDatabaseAsync();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
+    app.UseExceptionHandler("/Errors/500");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.UseStatusCodePagesWithReExecute("/Errors/{0}");
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
