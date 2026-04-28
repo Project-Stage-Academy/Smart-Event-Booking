@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using SmartEventBooking.Application.Abstractions.Identity;
 using SmartEventBooking.Application.Abstractions.Repositories;
@@ -110,11 +111,52 @@ namespace SmartEventBooking.Infrastructure.Identity
             return result;
         }
 
+        protected async Task<AuthResultDto> HandleLogin(ApplicationUser appUser, LoginDto dto)
+        {
+            var loginResult = await _signInManager.PasswordSignInAsync(
+                appUser, 
+                dto.Password, 
+                dto.RememberMe, 
+                lockoutOnFailure: true
+            );
+            if (loginResult.IsLockedOut)
+            {
+                _logger.LogInformation("Login failed for user {Email}: User locked out", dto.Email);
+                return new AuthResultDto
+                {
+                    Succeeded = false,
+                    Errors = new[] { "Login failed: Rate limited." }
+                };
+            }
+            else if (loginResult.IsNotAllowed)
+            {
+                _logger.LogInformation("Login failed for user {Email}: User not allowed to sign in", dto.Email);
+                return new AuthResultDto
+                {
+                    Succeeded = false,
+                    Errors = new[] { "Login failed: Please verify your email (should never happen for now)." } // TODO if email verification is implemented, reword
+                };
+            }
+            else if (!loginResult.Succeeded)
+            {
+                _logger.LogInformation("Login failed for user {Email}: Invalid password", dto.Email);
+                return new AuthResultDto
+                {
+                    Succeeded = false,
+                    Errors = new[] { "Login failed." }
+                };
+            }
+
+            return new AuthResultDto { Succeeded = true };
+        } 
+
         public async Task<AuthResultDto> LoginAsync(LoginDto dto)
         {
             _logger.LogInformation("Starting login for user {Email}", dto.Email);
 
             ApplicationUser? appUser = null;
+
+            AuthResultDto? result = null;
 
             try
             {
@@ -129,39 +171,7 @@ namespace SmartEventBooking.Infrastructure.Identity
                     };
                 }
 
-                var loginResult = await _signInManager.PasswordSignInAsync(
-                    appUser, 
-                    dto.Password, 
-                    dto.RememberMe, 
-                    lockoutOnFailure: true
-                );
-                if (loginResult.IsLockedOut)
-                {
-                    _logger.LogInformation("Login failed for user {Email}: User locked out", dto.Email);
-                    return new AuthResultDto
-                    {
-                        Succeeded = false,
-                        Errors = new[] { "Login failed." }
-                    };
-                }
-                else if (loginResult.IsNotAllowed)
-                {
-                    _logger.LogInformation("Login failed for user {Email}: User not allowed to sign in", dto.Email);
-                    return new AuthResultDto
-                    {
-                        Succeeded = false,
-                        Errors = new[] { "Login failed." }
-                    };
-                }
-                else if (!loginResult.Succeeded)
-                {
-                    _logger.LogInformation("Login failed for user {Email}: Invalid password", dto.Email);
-                    return new AuthResultDto
-                    {
-                        Succeeded = false,
-                        Errors = new[] { "Login failed." }
-                    };
-                }
+                result = await HandleLogin(appUser, dto);
             }
             catch (Exception ex)
             {
@@ -169,7 +179,7 @@ namespace SmartEventBooking.Infrastructure.Identity
                 throw;
             }
 
-            return new AuthResultDto { Succeeded = true };
+            return result;
         }
     }
 }
