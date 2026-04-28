@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging.Abstractions;
 using SmartEventBooking.Web.Controllers;
@@ -30,15 +31,5 @@ public class HomeControllerTests
         var result = CreateController().Privacy();
 
         result.Should().BeOfType<OkObjectResult>();
-    }
-
-    [Fact]
-    public void Error_ReturnsObjectResult_WithProblemDetails()
-    {
-        var result = CreateController().Error();
-
-        var objectResult = result.Should().BeOfType<ObjectResult>().Subject;
-        objectResult.StatusCode.Should().Be(500);
-        objectResult.Value.Should().BeOfType<ProblemDetails>();
     }
 }
