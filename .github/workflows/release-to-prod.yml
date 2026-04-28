@@ -83,7 +83,7 @@ jobs:
       - name: Smoke test API
         run: |
           curl --retry 10 --retry-delay 10 --retry-connrefused --fail \
-            https://${{ env.AZURE_WEBAPP_API_NAME }}.azurewebsites.net/health/db
+            ${{ vars.AZURE_WEBAPP_API_URL }}/health/db
 
   deploy-client:
     needs: build-and-push
@@ -99,4 +99,4 @@ jobs:
       - name: Smoke test Client
         run: |
           curl --retry 10 --retry-delay 10 --retry-connrefused --fail \
-            https://${{ env.AZURE_WEBAPP_CLIENT_NAME }}.azurewebsites.net
+            ${{ vars.AZURE_WEBAPP_CLIENT_URL }}
