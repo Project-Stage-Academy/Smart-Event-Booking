@@ -11,8 +11,10 @@ on:
 
 
 env:
-  BACKEND_IMAGE: smart-event-booking-api-app
-  FRONTEND_IMAGE: smart-event-booking-client-app
+  API_IMAGE: smart-event-booking-api-app
+  CLIENT_IMAGE: smart-event-booking-client-app
+  AZURE_WEBAPP_API_NAME: app-smarteventbooking-api
+  AZURE_WEBAPP_CLIENT_NAME: app-smarteventbooking-client
 
 jobs:
   build-and-push:
@@ -29,27 +31,47 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_ACCESSTOKEN }}
 
-      - name: Build and push Backend
+      - name: Build and push API
         uses: docker/build-push-action@v5
         with:
           context: .
           file: src/api/SmartEventBooking.Web/Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.BACKEND_IMAGE }}:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.API_IMAGE }}:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.API_IMAGE }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push Frontend
+      - name: Build and push Client
         uses: docker/build-push-action@v5
         with:
           context: ./src/client
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.FRONTEND_IMAGE }}:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.CLIENT_IMAGE }}:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.CLIENT_IMAGE }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  # ---------------------- Don't forget to write job for deploy
+  deploy-api:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy API to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_API_NAME }}
+          publish-profile: ${{ secrets.AZURE_API_PUBLISH_PROFILE }}
+          images: '${{ secrets.DOCKERHUB_USERNAME }}/${{ env.API_IMAGE }}:${{ github.sha }}'
+
+  deploy-client:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy Client to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_CLIENT_NAME }}
+          publish-profile: ${{ secrets.AZURE_CLIENT_PUBLISH_PROFILE }}
+          images: '${{ secrets.DOCKERHUB_USERNAME }}/${{ env.CLIENT_IMAGE }}:${{ github.sha }}'
