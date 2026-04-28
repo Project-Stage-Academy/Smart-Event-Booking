@@ -1,6 +1,6 @@
 # Smart Event Booking
 
-Full-stack event discovery and ticket booking platform — ASP.NET Core 10 API + Angular client.
+ASP.NET Core REST API and Angular application for event discovery and ticket booking.
 
 For product vision, scope, and contribution workflow, see `PROJECT_SCOPE.md`.
 
@@ -13,6 +13,8 @@ For product vision, scope, and contribution workflow, see `PROJECT_SCOPE.md`.
 - .NET SDK 10.0
 - Node.js 24 LTS (see [Node version setup](#node-version-setup))
 - SQL Server (local instance or Docker)
+- Node.js (v18 or later) and npm
+- Angular CLI (`npm install -g @angular/cli`)
 
 ## Running with Docker Compose
 
