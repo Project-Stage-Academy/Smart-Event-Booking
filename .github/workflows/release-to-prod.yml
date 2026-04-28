@@ -11,8 +11,8 @@ on:
 
 
 env:
-  BACKEND_IMAGE: smart-event-api-app
-  FRONTEND_IMAGE: smart-event-client-app
+  BACKEND_IMAGE: smart-event-booking-api-app
+  FRONTEND_IMAGE: smart-event-booking-client-app
 
 jobs:
   build-and-push:
