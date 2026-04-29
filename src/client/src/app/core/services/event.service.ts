@@ -11,7 +11,7 @@ import { environment } from '../../../environments/environment';
 })
 export class EventService {
   private http = inject(HttpClient);
-  private apiUrl = environment.apiUrl;
+  private apiUrl = `${environment.apiUrl}/events`;
 
   getUpcomingEvents(page: number = 1, pageSize: number = 5, search?: EventSearchDto): Observable<PaginatedList<Event>> {
     let params = new HttpParams()

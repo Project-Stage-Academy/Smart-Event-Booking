@@ -10,6 +10,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/events/event-details/event-details.component').then(m => m.EventDetailsComponent)
   },
   {
+    path: 'register',
+    loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent)
+  },
+  {
     path: 'forbidden',
     loadComponent: () => import('./features/errors/forbidden.component').then(m => m.ForbiddenComponent)
   },
