@@ -52,7 +52,7 @@
         </div>
       </div>
 
-      <button type="submit" [disabled]="registerForm.invalid || isLoading()" class="btn-submit">
+      <button type="submit" [disabled]="isLoading()" class="btn-submit">
         <span *ngIf="!isLoading()">Register</span>
         <span *ngIf="isLoading()">Creating account...</span>
       </button>

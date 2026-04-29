@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { EventService } from '../../core/services/event.service';
 import { CategoryService } from '../../core/services/category.service';
@@ -12,14 +12,14 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-events-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './events-list.component.html',
   styleUrls: ['./events-list.component.scss']
 })
 export class EventsListComponent implements OnInit, OnDestroy {
-  private eventService = inject(EventService);
-  private categoryService = inject(CategoryService);
-  private cdr = inject(ChangeDetectorRef);
+  private readonly eventService = inject(EventService);
+  private readonly categoryService = inject(CategoryService);
+  private readonly cdr = inject(ChangeDetectorRef);
   private subscription?: Subscription;
   private categorySubscription?: Subscription;
 

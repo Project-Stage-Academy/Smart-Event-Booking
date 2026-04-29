@@ -14,6 +14,7 @@ export interface RegisterRequest {
 
 export interface AuthResponse {
   message: string;
+  roles: string[];
 }
 
 export interface AuthSession {
@@ -21,4 +22,5 @@ export interface AuthSession {
   rememberMe: boolean;
   message: string;
   loggedInAt: string;
+  roles: string[];
 }

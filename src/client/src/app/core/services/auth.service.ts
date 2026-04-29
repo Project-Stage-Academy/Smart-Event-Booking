@@ -15,6 +15,7 @@ export class AuthService {
 
   readonly authSession = computed(() => this.authSessionSignal());
   readonly userEmail = computed(() => this.authSessionSignal()?.email ?? null);
+  readonly roles = computed(() => this.authSessionSignal()?.roles ?? []);
   readonly isLoggedIn = computed(() => this.authSessionSignal() !== null);
 
   private readonly authApiUrl = environment.apiUrl.endsWith('/events')
@@ -22,7 +23,16 @@ export class AuthService {
     : `${environment.apiUrl}/auth`;
 
   register(request: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.authApiUrl}/register`, request);
+    return this.http.post<AuthResponse>(`${this.authApiUrl}/register`, request)
+      .pipe(tap((response) => {
+        this.setAuthSession({
+          email: request.email,
+          rememberMe: false, // Default for registration
+          message: response.message,
+          loggedInAt: new Date().toISOString(),
+          roles: response.roles
+        });
+      }));
   }
 
   login(request: LoginRequest): Observable<AuthResponse> {
@@ -32,7 +42,8 @@ export class AuthService {
           email: request.email,
           rememberMe: request.rememberMe,
           message: response.message,
-          loggedInAt: new Date().toISOString()
+          loggedInAt: new Date().toISOString(),
+          roles: response.roles
         });
       }));
   }
@@ -109,7 +120,8 @@ export class AuthService {
         parsed.email.trim().length === 0 ||
         typeof parsed.rememberMe !== 'boolean' ||
         typeof parsed.message !== 'string' ||
-        typeof parsed.loggedInAt !== 'string'
+        typeof parsed.loggedInAt !== 'string' ||
+        !Array.isArray(parsed.roles)
       ) {
         return null;
       }
@@ -118,7 +130,8 @@ export class AuthService {
         email: parsed.email.trim(),
         rememberMe: parsed.rememberMe,
         message: parsed.message,
-        loggedInAt: parsed.loggedInAt
+        loggedInAt: parsed.loggedInAt,
+        roles: parsed.roles
       };
     } catch {
       return null;

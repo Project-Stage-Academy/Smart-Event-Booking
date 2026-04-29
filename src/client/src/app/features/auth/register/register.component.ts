@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -20,14 +20,14 @@ const passwordsMatchValidator: ValidatorFn = (control: AbstractControl): Validat
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss'
 })
 export class RegisterComponent {
-  private fb = inject(FormBuilder);
-  private authService = inject(AuthService);
-  private router = inject(Router);
+  private readonly fb = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   readonly registerForm = this.fb.nonNullable.group({
     firstName: ['', [Validators.required, Validators.maxLength(50)]],
@@ -74,6 +74,8 @@ export class RegisterComponent {
       return err.error.join(', ');
     } else if (err.error && typeof err.error === 'object' && err.error.errors) {
       return Object.values(err.error.errors).flat().join(', ');
+    } else if (typeof err.error === 'string') {
+      return err.error;
     } else {
       return err.error?.message || err.message || 'An error occurred during registration.';
     }
