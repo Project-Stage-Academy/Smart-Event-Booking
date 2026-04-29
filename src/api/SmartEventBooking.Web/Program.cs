@@ -28,6 +28,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.Name = "SmartEventBooking.Auth";
     options.ExpireTimeSpan = TimeSpan.FromDays(7);
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
 
 builder.Services.AddCors(options =>
@@ -36,7 +38,8 @@ builder.Services.AddCors(options =>
     {
         builder.WithOrigins("http://localhost:4200", "https://localhost:4200")
                .AllowAnyMethod()
-               .AllowAnyHeader();
+               .AllowAnyHeader()
+               .AllowCredentials();
     });
 });
 
