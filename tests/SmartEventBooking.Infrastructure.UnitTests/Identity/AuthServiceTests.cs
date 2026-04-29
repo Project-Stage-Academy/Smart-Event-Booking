@@ -269,7 +269,7 @@ public class AuthServiceTests
         var result = await _authService.LoginAsync(dto);
 
         result.Succeeded.Should().BeFalse();
-        result.Errors.Should().ContainSingle().Which.Should().Be("Login failed.");
+        result.Errors.Should().ContainSingle().Which.Should().Be("Login failed: Please verify your email (should never happen for now).");
     }
 
     [Fact]
@@ -298,7 +298,7 @@ public class AuthServiceTests
         var result = await _authService.LoginAsync(dto);
 
         result.Succeeded.Should().BeFalse();
-        result.Errors.Should().ContainSingle().Which.Should().Be("Login failed: Please verify your email (should never happen for now).");
+        result.Errors.Should().ContainSingle().Which.Should().Be("Login failed.");
     }
 
     [Theory]
