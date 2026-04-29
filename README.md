@@ -51,7 +51,7 @@ dotnet ef database update --project src/SmartEventBooking.Infrastructure/SmartEv
 ## 4) Run the app
 
 ```bash
-dotnet run --project src/SmartEventBooking.Web/SmartEventBooking.Web.csproj --launch-profile https
+dotnet run --project src/api/SmartEventBooking.Web/SmartEventBooking.Web.csproj --launch-profile https
 ```
 
 Default URLs (development):
@@ -71,6 +71,7 @@ To start a local development server for the frontend, navigate to the client dir
 
 ```bash
 cd src/client
+npm install
 ng serve
 ```
 
