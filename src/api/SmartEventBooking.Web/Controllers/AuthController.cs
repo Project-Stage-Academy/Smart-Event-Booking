@@ -27,4 +27,17 @@ public class AuthController : ControllerBase
 
         return BadRequest(result.Errors);
     }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login(LoginDto dto)
+    {
+        var result = await _authService.LoginAsync(dto);
+
+        if (result.Succeeded)
+        {
+            return Ok(new { message = "Login successful" });
+        }
+
+        return BadRequest(result.Errors);
+    }
 }

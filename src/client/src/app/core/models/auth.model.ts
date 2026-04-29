@@ -1,3 +1,9 @@
+export interface LoginRequest {
+  email: string;
+  password: string;
+  rememberMe: boolean;
+}
+
 export interface RegisterRequest {
   email: string;
   password: string;
@@ -8,4 +14,11 @@ export interface RegisterRequest {
 
 export interface AuthResponse {
   message: string;
+}
+
+export interface AuthSession {
+  email: string;
+  rememberMe: boolean;
+  message: string;
+  loggedInAt: string;
 }
