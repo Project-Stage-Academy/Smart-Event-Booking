@@ -28,11 +28,10 @@ builder.Services
 // ------- Left here on purpose, waiting for AuthController implementation
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = "/Auth/Register";
-    options.AccessDeniedPath = "/Errors/403";
-
     options.Cookie.Name = "SmartEventBooking.Auth";
     options.ExpireTimeSpan = TimeSpan.FromDays(7);
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
 
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()

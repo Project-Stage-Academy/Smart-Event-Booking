@@ -1,0 +1,38 @@
+.app-header {
+  background: #1d3557;
+  padding: 0.75rem 1.5rem;
+}
+
+.app-nav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+
+  > div {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  a {
+    color: #f1faee;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0.4rem 0.65rem;
+    border-radius: 6px;
+  }
+
+  a:hover {
+    background: #27496d;
+  }
+
+  .active-link {
+    background: #457b9d;
+  }
+
+  .welcome-message {
+    color: #f1faee;
+    font-weight: 600;
+  }
+}

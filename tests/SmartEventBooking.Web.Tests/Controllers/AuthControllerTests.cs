@@ -62,8 +62,73 @@ public class AuthControllerTests
         var result = await _controller.Register(dto);
 
         result.Should().BeOfType<BadRequestObjectResult>();
-        
+
         var badRequestResult = result as BadRequestObjectResult;
         (badRequestResult?.Value as IEnumerable<string>).Should().Contain("Email already taken");
+    }
+
+    [Fact]
+    public async Task Login_ReturnsOk_WhenLoginSucceeds()
+    {
+        var dto = new LoginDto
+        {
+            Email = "test@example.com",
+            Password = "Password123!",
+            RememberMe = true
+        };
+
+        _authServiceMock.Setup(x => x.LoginAsync(dto))
+            .ReturnsAsync(new AuthResultDto { Succeeded = true });
+
+        var result = await _controller.Login(dto);
+
+        result.Should().BeOfType<OkObjectResult>();
+    }
+
+    [Fact]
+    public async Task Login_ReturnsBadRequest_WhenLoginFails()
+    {
+        var dto = new LoginDto
+        {
+            Email = "test@example.com",
+            Password = "Password123!",
+            RememberMe = true
+        };
+
+        _authServiceMock.Setup(x => x.LoginAsync(dto))
+            .ReturnsAsync(new AuthResultDto { Succeeded = false, Errors = ["Invalid credentials"] });
+
+        var result = await _controller.Login(dto);
+
+        result.Should().BeOfType<BadRequestObjectResult>();
+
+        var badRequestResult = result as BadRequestObjectResult;
+        (badRequestResult?.Value as IEnumerable<string>).Should().Contain("Invalid credentials");
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Login_ForwardsRememberMeToAuthService(bool rememberMe)
+    {
+        var dto = new LoginDto
+        {
+            Email = "test@example.com",
+            Password = "Password123!",
+            RememberMe = rememberMe
+        };
+
+        _authServiceMock
+            .Setup(x => x.LoginAsync(It.IsAny<LoginDto>()))
+            .ReturnsAsync(new AuthResultDto { Succeeded = true });
+
+        await _controller.Login(dto);
+
+        _authServiceMock.Verify(
+            x => x.LoginAsync(It.Is<LoginDto>(d =>
+                d.Email == dto.Email &&
+                d.Password == dto.Password &&
+                d.RememberMe == rememberMe)),
+            Times.Once);
     }
 }

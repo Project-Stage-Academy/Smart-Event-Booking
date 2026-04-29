@@ -1,0 +1,51 @@
+<section class="auth-container">
+  <h2>Create Account</h2>
+
+  <form [formGroup]="registerForm" (ngSubmit)="submit()" class="auth-form" novalidate>
+    <label for="firstName">First Name</label>
+    <input id="firstName" type="text" formControlName="firstName" placeholder="Jane" />
+    <p class="error" *ngIf="registerForm.controls.firstName.touched && registerForm.controls.firstName.invalid">
+      First name is required and must be 50 characters or fewer.
+    </p>
+
+    <label for="lastName">Last Name</label>
+    <input id="lastName" type="text" formControlName="lastName" placeholder="Doe" />
+    <p class="error" *ngIf="registerForm.controls.lastName.touched && registerForm.controls.lastName.invalid">
+      Last name must be 50 characters or fewer.
+    </p>
+
+    <label for="email">Email</label>
+    <input id="email" type="email" formControlName="email" placeholder="you@example.com" />
+    <p class="error" *ngIf="registerForm.controls.email.touched && registerForm.controls.email.invalid">
+      Please enter a valid email address.
+    </p>
+
+    <label for="password">Password</label>
+    <input id="password" type="password" formControlName="password" placeholder="At least 6 characters" />
+    <p class="error" *ngIf="registerForm.controls.password.touched && registerForm.controls.password.invalid">
+      Password must be at least 6 characters.
+    </p>
+
+    <label for="confirmPassword">Confirm Password</label>
+    <input id="confirmPassword" type="password" formControlName="confirmPassword" placeholder="Re-enter password" />
+    <p class="error" *ngIf="registerForm.controls.confirmPassword.touched && registerForm.controls.confirmPassword.invalid">
+      Confirm password is required.
+    </p>
+    <p class="error" *ngIf="registerForm.touched && registerForm.errors?.['passwordMismatch']">
+      Password and confirmation password do not match.
+    </p>
+
+    <button type="submit" [disabled]="isSubmitting">{{ isSubmitting ? 'Creating account...' : 'Register' }}</button>
+  </form>
+
+  <div class="status success" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <ul class="status error-list" *ngIf="errorMessages.length > 0">
+    <li *ngFor="let message of errorMessages">{{ message }}</li>
+  </ul>
+
+  <p class="auth-switch">
+    Already have an account?
+    <a routerLink="/login">Login</a>
+  </p>
+</section>
