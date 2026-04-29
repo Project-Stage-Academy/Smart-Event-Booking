@@ -150,7 +150,12 @@ export class AuthService {
         email: parsed.email.trim(),
         rememberMe: parsed.rememberMe,
         message: parsed.message,
-        roles: Array.isArray(parsed.roles) ? parsed.roles : [],
+        roles: Array.isArray(parsed.roles) 
+          ? parsed.roles
+              .filter((r): r is string => typeof r === 'string')
+              .map(r => r.trim())
+              .filter(r => r.length > 0) 
+          : [],
         loggedInAt: parsed.loggedInAt
       };
     } catch {

@@ -6,15 +6,31 @@ export const roleGuard: CanActivateFn = (route) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  const requiredRole = route.data?.['role'];
-
   if (!authService.isLoggedIn()) {
-    return router.parseUrl('/login');
+    return router.createUrlTree(['/login']);
   }
 
-  if (requiredRole && authService.hasRole(requiredRole)) {
+  const role = route.data?.['role'];
+  const roles = route.data?.['roles'];
+
+  let requiredRoles: string[] = [];
+
+  if (typeof role === 'string') {
+    requiredRoles.push(role);
+  } else if (Array.isArray(roles)) {
+    requiredRoles = roles.filter(r => typeof r === 'string');
+  }
+
+  if (requiredRoles.length === 0) {
+    console.warn(`RoleGuard: No valid role settings found for the route. Access denied.`);
+    return router.createUrlTree(['/forbidden']);
+  }
+
+  const hasAccess = requiredRoles.some(r => authService.hasRole(r));
+
+  if (hasAccess) {
     return true;
   }
 
-  return router.parseUrl('/forbidden');
+  return router.createUrlTree(['/forbidden']);
 };
