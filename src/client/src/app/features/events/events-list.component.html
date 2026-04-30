@@ -35,7 +35,18 @@
         <tbody>
           <tr *ngFor="let event of paginatedEvents">
             <td>{{ event.title }}</td>
-            <td class="category-cell" [title]="event.categories?.join(', ') || 'N/A'">{{ event.categories?.join(', ') || 'N/A' }}</td>
+            <td class="category-cell">
+              <ng-container *ngIf="event.categories?.length; else noCategory">
+                <span
+                  class="category-badge"
+                  *ngFor="let cat of event.categories"
+                  [style.background-color]="getCategoryBg(cat)"
+                  [style.color]="getCategoryTextColor(cat)">
+                  {{ cat | titlecase }}
+                </span>
+              </ng-container>
+              <ng-template #noCategory>—</ng-template>
+            </td>
             <td>
               <i class="bi bi-calendar-event"></i> {{ event.startDateTime | date: 'mediumDate' }}
             </td>

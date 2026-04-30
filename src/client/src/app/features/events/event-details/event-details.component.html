@@ -16,7 +16,13 @@
     <div class="event-header">
       <h1 class="event-title">{{ event()!.title }}</h1>
       <div class="event-categories" *ngIf="event()!.categories?.length">
-        <span class="category-badge" *ngFor="let cat of event()!.categories">{{ cat }}</span>
+        <span
+          class="category-badge"
+          *ngFor="let cat of event()!.categories"
+          [style.background-color]="getCategoryBg(cat)"
+          [style.color]="getCategoryTextColor(cat)">
+          {{ cat | titlecase }}
+        </span>
       </div>
     </div>
 

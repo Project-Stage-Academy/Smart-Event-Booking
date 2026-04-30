@@ -120,10 +120,17 @@
 }
 
 .category-cell {
-  max-width: 150px;
+  max-width: 200px;
+}
+
+.category-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: bold;
+  margin: 0.15rem 0.2rem 0.15rem 0;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .events-table-wrapper {

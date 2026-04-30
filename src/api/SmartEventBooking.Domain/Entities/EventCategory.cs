@@ -1,5 +1,3 @@
-using System;
-
 namespace SmartEventBooking.Domain.Entities;
 
 public class EventCategory
@@ -17,6 +15,14 @@ public class EventCategory
     {
         Id = id;
         CategoryId = categoryId;
+        EventId = eventId;
+    }
+
+    public EventCategory(Guid id, Category category, Guid eventId)
+    {
+        Id = id;
+        Category = category;
+        CategoryId = category.Id;
         EventId = eventId;
     }
 }

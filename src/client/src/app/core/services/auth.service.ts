@@ -2,31 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { ConfigService } from './config.service';
-
-export interface LoginRequest {
-  email: string;
-  password: string;
-  rememberMe: boolean;
-}
-
-export interface RegisterRequest {
-  email: string;
-  password: string;
-  confirmPassword: string;
-  firstName: string;
-  lastName?: string;
-}
-
-interface AuthResponse {
-  message: string;
-}
-
-export interface AuthSession {
-  email: string;
-  rememberMe: boolean;
-  message: string;
-  loggedInAt: string;
-}
+import { LoginRequest, RegisterRequest, AuthResponse, AuthSession } from '../models/auth.model';
 
 @Injectable({
   providedIn: 'root'
@@ -40,14 +16,28 @@ export class AuthService {
 
   readonly authSession = computed(() => this.authSessionSignal());
   readonly userEmail = computed(() => this.authSessionSignal()?.email ?? null);
+  readonly roles = computed(() => this.authSessionSignal()?.roles ?? []);
   readonly isLoggedIn = computed(() => this.authSessionSignal() !== null);
+
+  hasRole(role: string): boolean {
+    return this.roles().includes(role);
+  }
 
   private get authApiUrl(): string {
     return `${this.config.apiBaseUrl}/api/auth`;
   }
 
   register(request: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.authApiUrl}/register`, request);
+    return this.http.post<AuthResponse>(`${this.authApiUrl}/register`, request)
+      .pipe(tap((response) => {
+        this.setAuthSession({
+          email: request.email,
+          rememberMe: false, // Default for registration
+          message: response.message,
+          loggedInAt: new Date().toISOString(),
+          roles: response.roles
+        });
+      }));
   }
 
   login(request: LoginRequest): Observable<AuthResponse> {
@@ -57,6 +47,7 @@ export class AuthService {
           email: request.email,
           rememberMe: request.rememberMe,
           message: response.message,
+          roles: response.roles ?? [],
           loggedInAt: new Date().toISOString()
         });
       }));
@@ -134,7 +125,8 @@ export class AuthService {
         parsed.email.trim().length === 0 ||
         typeof parsed.rememberMe !== 'boolean' ||
         typeof parsed.message !== 'string' ||
-        typeof parsed.loggedInAt !== 'string'
+        typeof parsed.loggedInAt !== 'string' ||
+        !Array.isArray(parsed.roles)
       ) {
         return null;
       }
@@ -143,6 +135,12 @@ export class AuthService {
         email: parsed.email.trim(),
         rememberMe: parsed.rememberMe,
         message: parsed.message,
+        roles: Array.isArray(parsed.roles) 
+          ? parsed.roles
+              .filter((r): r is string => typeof r === 'string')
+              .map(r => r.trim())
+              .filter(r => r.length > 0) 
+          : [],
         loggedInAt: parsed.loggedInAt
       };
     } catch {

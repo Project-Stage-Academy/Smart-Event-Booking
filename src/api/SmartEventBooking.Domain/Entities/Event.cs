@@ -132,7 +132,11 @@ public class Event
         if (category == null)
             throw new ArgumentNullException(nameof(category));
 
-        if (_eventCategories.Any(ec => ec.CategoryId == category.CategoryId))
+        var isDuplicate = category.CategoryId != 0
+            ? _eventCategories.Any(ec => ec.CategoryId == category.CategoryId)
+            : _eventCategories.Any(ec => ReferenceEquals(ec.Category, category.Category));
+
+        if (isDuplicate)
             throw new InvalidOperationException("This category is already added to the event.");
 
         _eventCategories.Add(category);
