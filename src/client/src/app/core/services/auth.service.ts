@@ -17,7 +17,6 @@ export class AuthService {
   readonly userEmail = computed(() => this.authSessionSignal()?.email ?? null);
   readonly roles = computed(() => this.authSessionSignal()?.roles ?? []);
   readonly isLoggedIn = computed(() => this.authSessionSignal() !== null);
-  readonly roles = computed(() => this.authSessionSignal()?.roles ?? []);
 
   hasRole(role: string): boolean {
     return this.roles().includes(role);
