@@ -1,5 +1,6 @@
-﻿using SmartEventBooking.Application.Abstractions.Repositories;
+using SmartEventBooking.Application.Abstractions.Repositories;
 using SmartEventBooking.Application.Abstractions.Services;
+using SmartEventBooking.Application.DTOs;
 using SmartEventBooking.Application.DTOs.CreateEvent;
 using SmartEventBooking.Application.DTOs.UpdateEvent;
 using SmartEventBooking.Application.DTOs.Event;
@@ -14,11 +15,13 @@ namespace SmartEventBooking.Application.Services
     {
         public readonly IEventRepository _repository;
         private readonly IVenueRepository _venueRepository;
-        
-        public EventService(IEventRepository repository, IVenueRepository venueRepository)
+        private readonly ICategoryRepository _categoryRepository;
+
+        public EventService(IEventRepository repository, IVenueRepository venueRepository, ICategoryRepository categoryRepository)
         {
             _repository = repository;
             _venueRepository = venueRepository;
+            _categoryRepository = categoryRepository;
         }
 
         public async Task<PaginatedListDto<EventDto>> GetAllAsync(int page = 1, int pageSize = 5, CancellationToken cancellationToken = default)
@@ -67,11 +70,11 @@ namespace SmartEventBooking.Application.Services
                 Id = ev.Id,
                 Title = ev.Title,
                 Description = ev.Description,
-                Banner = ev.Banner,                
+                Banner = ev.Banner,
                 StartDateTime = ev.StartDateTime,
                 EndDateTime = ev.EndDateTime,
                 TotalCapacity = ev.TotalCapacity,
-                AvailableSeats = ev.AvailableSeats, 
+                AvailableSeats = ev.AvailableSeats,
                 Price = ev.Price,
                 Status = ev.Status,
                 VenueId = ev.VenueId,
@@ -85,10 +88,9 @@ namespace SmartEventBooking.Application.Services
             var venueExists = await _venueRepository.ExistsAsync(request.VenueId, cancellationToken);
 
             if (!venueExists)
-            {
                 return null;
-            }
-                var newEvent = new Event(
+
+            var newEvent = new Event(
                 Guid.NewGuid(),
                 request.Title,
                 request.Description,
@@ -101,8 +103,15 @@ namespace SmartEventBooking.Application.Services
             );
 
             if (!string.IsNullOrWhiteSpace(request.Banner))
-            {
                 newEvent.SetBanner(request.Banner);
+
+            foreach (var input in request.Categories)
+            {
+                var category = await ResolveOrCreateCategoryAsync(input, cancellationToken);
+                if (category == null)
+                    return null;
+
+                newEvent.AddCategory(new EventCategory(Guid.NewGuid(), category, newEvent.Id));
             }
 
             await _repository.AddAsync(newEvent, cancellationToken);
@@ -116,16 +125,12 @@ namespace SmartEventBooking.Application.Services
             var existingEvent = await _repository.GetByIdAsync(request.Id, cancellationToken);
 
             if (existingEvent == null)
-            {
-               return false;
-            }
+                return false;
 
             var venueExists = await _venueRepository.ExistsAsync(request.VenueId, cancellationToken);
 
             if (!venueExists)
-            {
                 return false;
-            }
 
             existingEvent.Update(
                 request.Title,
@@ -138,6 +143,17 @@ namespace SmartEventBooking.Application.Services
                 request.VenueId,
                 request.Status.Value
             );
+
+            existingEvent.ClearCategories();
+
+            foreach (var input in request.Categories)
+            {
+                var category = await ResolveOrCreateCategoryAsync(input, cancellationToken);
+                if (category == null)
+                    return false;
+
+                existingEvent.AddCategory(new EventCategory(Guid.NewGuid(), category, existingEvent.Id));
+            }
 
             _repository.Update(existingEvent);
 
@@ -162,14 +178,26 @@ namespace SmartEventBooking.Application.Services
             var ev = await _repository.GetByIdAsync(id, cancellationToken);
 
             if (ev == null)
-            {
                 return false;
-            }
-                
+
             _repository.Delete(ev);
             await _repository.SaveChangesAsync(cancellationToken);
 
             return true;
+        }
+
+        private async Task<Category?> ResolveOrCreateCategoryAsync(CategoryInputDto input, CancellationToken cancellationToken)
+        {
+            if (input.Id.HasValue)
+                return await _categoryRepository.GetByIdAsync(input.Id.Value, cancellationToken);
+
+            var existing = await _categoryRepository.GetByNameAsync(input.Name!, cancellationToken);
+            if (existing != null)
+                return existing;
+
+            var newCategory = new Category(0, input.Name!);
+            await _categoryRepository.AddAsync(newCategory, cancellationToken);
+            return newCategory;
         }
 
         private static EventDto MapToEventDto(Event e)
