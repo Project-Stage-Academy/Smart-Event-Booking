@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 import { loggedOutOnlyGuard } from './core/guards/logged-out-only.guard';
+import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -18,11 +20,14 @@ export const routes: Routes = [
   },
   {
     path: 'events/:id',
+    canActivate: [authGuard],
     loadComponent: () => import('./features/events/event-details/event-details.component').then(m => m.EventDetailsComponent)
   },
   {
-    path: 'register',
-    loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent)
+    path: 'admin',
+    canActivate: [roleGuard],
+    data: { role: 'Admin' },
+    loadComponent: () => import('./features/errors/not-found.component').then(m => m.NotFoundComponent) // Example stub
   },
   {
     path: 'forbidden',

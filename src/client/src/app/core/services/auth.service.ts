@@ -17,6 +17,11 @@ export class AuthService {
   readonly userEmail = computed(() => this.authSessionSignal()?.email ?? null);
   readonly roles = computed(() => this.authSessionSignal()?.roles ?? []);
   readonly isLoggedIn = computed(() => this.authSessionSignal() !== null);
+  readonly roles = computed(() => this.authSessionSignal()?.roles ?? []);
+
+  hasRole(role: string): boolean {
+    return this.roles().includes(role);
+  }
 
   private readonly authApiUrl = environment.apiUrl.endsWith('/events')
     ? environment.apiUrl.replace('/events', '/auth')
@@ -42,8 +47,8 @@ export class AuthService {
           email: request.email,
           rememberMe: request.rememberMe,
           message: response.message,
-          loggedInAt: new Date().toISOString(),
-          roles: response.roles
+          roles: response.roles ?? [],
+          loggedInAt: new Date().toISOString()
         });
       }));
   }
@@ -130,8 +135,13 @@ export class AuthService {
         email: parsed.email.trim(),
         rememberMe: parsed.rememberMe,
         message: parsed.message,
-        loggedInAt: parsed.loggedInAt,
-        roles: parsed.roles
+        roles: Array.isArray(parsed.roles) 
+          ? parsed.roles
+              .filter((r): r is string => typeof r === 'string')
+              .map(r => r.trim())
+              .filter(r => r.length > 0) 
+          : [],
+        loggedInAt: parsed.loggedInAt
       };
     } catch {
       return null;

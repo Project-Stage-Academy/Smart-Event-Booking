@@ -141,7 +141,7 @@ namespace SmartEventBooking.Infrastructure.Identity
                     Errors = new[] { "Login failed: Please verify your email (should never happen for now)." } // TODO if email verification is implemented, reword
                 };
             }
-            else if (!loginResult.Succeeded)
+            if (!loginResult.Succeeded)
             {
                 _logger.LogInformation("Login failed for user {Email}: Invalid password", dto.Email);
                 return new AuthResultDto
@@ -152,8 +152,8 @@ namespace SmartEventBooking.Infrastructure.Identity
             }
 
             var roles = await _userManager.GetRolesAsync(appUser);
-            return new AuthResultDto 
-            { 
+            return new AuthResultDto
+            {
                 Succeeded = true,
                 Roles = roles
             };
