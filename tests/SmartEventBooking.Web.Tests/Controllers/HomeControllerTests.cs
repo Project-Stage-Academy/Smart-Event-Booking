@@ -3,36 +3,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging.Abstractions;
 using SmartEventBooking.Web.Controllers;
-using SmartEventBooking.Web.Models;
 
 namespace SmartEventBooking.Web.Tests.Controllers;
 
 public class HomeControllerTests
 {
-    [Fact]
-    public void Index_ReturnsViewResult()
-    {
-        var controller = new HomeController(NullLogger<HomeController>.Instance);
-
-        var result = controller.Index();
-
-        result.Should().BeOfType<ViewResult>();
-    }
-
-    [Fact]
-    public void Privacy_ReturnsViewResult()
-    {
-        var controller = new HomeController(NullLogger<HomeController>.Instance);
-
-        var result = controller.Privacy();
-
-        result.Should().BeOfType<ViewResult>();
-    }
-
-    [Fact]
-    public void Error_ReturnsViewWithErrorViewModel()
-    {
-        var controller = new HomeController(NullLogger<HomeController>.Instance)
+    private static HomeController CreateController() =>
+        new(NullLogger<HomeController>.Instance)
         {
             ControllerContext = new ControllerContext
             {
@@ -40,9 +17,19 @@ public class HomeControllerTests
             }
         };
 
-        var result = controller.Error();
+    [Fact]
+    public void Index_ReturnsOkResult()
+    {
+        var result = CreateController().Index();
 
-        var viewResult = result.Should().BeOfType<ViewResult>().Subject;
-        viewResult.Model.Should().BeOfType<ErrorViewModel>();
+        result.Should().BeOfType<OkObjectResult>();
+    }
+
+    [Fact]
+    public void Privacy_ReturnsOkResult()
+    {
+        var result = CreateController().Privacy();
+
+        result.Should().BeOfType<OkObjectResult>();
     }
 }

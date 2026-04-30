@@ -1,0 +1,35 @@
+<section class="auth-container">
+  <h2>Login</h2>
+
+  <form [formGroup]="loginForm" (ngSubmit)="submit()" class="auth-form" novalidate>
+    <label for="email">Email</label>
+    <input id="email" type="email" formControlName="email" placeholder="you@example.com" />
+    <p class="error" *ngIf="loginForm.controls.email.touched && loginForm.controls.email.invalid">
+      Please enter a valid email address.
+    </p>
+
+    <label for="password">Password</label>
+    <input id="password" type="password" formControlName="password" placeholder="At least 6 characters" />
+    <p class="error" *ngIf="loginForm.controls.password.touched && loginForm.controls.password.invalid">
+      Password must be at least 6 characters.
+    </p>
+
+    <label class="checkbox-row">
+      <input type="checkbox" formControlName="rememberMe" />
+      <span>Remember me</span>
+    </label>
+
+    <button type="submit" [disabled]="isSubmitting">{{ isSubmitting ? 'Logging in...' : 'Login' }}</button>
+  </form>
+
+  <div class="status success" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <ul class="status error-list" *ngIf="errorMessages.length > 0">
+    <li *ngFor="let message of errorMessages">{{ message }}</li>
+  </ul>
+
+  <p class="auth-switch">
+    Need an account?
+    <a routerLink="/register">Create one</a>
+  </p>
+</section>
