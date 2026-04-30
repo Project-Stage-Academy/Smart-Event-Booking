@@ -41,10 +41,16 @@ public class AuthController : ControllerBase
         });
     }
 
-    [HttpGet("login")]
-    [AllowAnonymous]
-    public IActionResult Login()
+    [HttpPost("login")]
+    public async Task<IActionResult> Login(LoginDto dto)
     {
-        return Ok(new { message = "Please, log in to the system" });
+        var result = await _authService.LoginAsync(dto);
+
+        if (result.Succeeded)
+        {
+            return Ok(new { message = "Login successful" });
+        }
+
+        return BadRequest(result.Errors);
     }
 }

@@ -163,4 +163,176 @@ public class AuthServiceTests
         _unitOfWorkMock.Verify(x => x.CommitTransactionAsync(default), Times.Never);
         _signInManagerMock.Verify(x => x.SignInAsync(It.IsAny<ApplicationUser>(), It.IsAny<bool>(), It.IsAny<string>()), Times.Never);
     }
+
+    [Fact]
+    public async Task LoginAsync_ShouldReturnSuccess_WhenCredentialsAreValid()
+    {
+        var dto = new LoginDto
+        {
+            Email = "test@test.com",
+            Password = "Password123!",
+            RememberMe = true
+        };
+
+        var appUser = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = dto.Email,
+            UserName = dto.Email
+        };
+
+        _userManagerMock.Setup(x => x.FindByEmailAsync(dto.Email))
+            .ReturnsAsync(appUser);
+
+        _signInManagerMock.Setup(x => x.PasswordSignInAsync(appUser, dto.Password, dto.RememberMe, true))
+            .ReturnsAsync(SignInResult.Success);
+
+        var result = await _authService.LoginAsync(dto);
+
+        result.Succeeded.Should().BeTrue();
+        _userManagerMock.Verify(x => x.FindByEmailAsync(dto.Email), Times.Once);
+        _signInManagerMock.Verify(x => x.PasswordSignInAsync(appUser, dto.Password, dto.RememberMe, true), Times.Once);
+    }
+
+    [Fact]
+    public async Task LoginAsync_ShouldReturnErrors_WhenUserDoesNotExist()
+    {
+        var dto = new LoginDto
+        {
+            Email = "missing@test.com",
+            Password = "Password123!",
+            RememberMe = false
+        };
+
+        _userManagerMock.Setup(x => x.FindByEmailAsync(dto.Email))
+            .ReturnsAsync((ApplicationUser?)null);
+
+        var result = await _authService.LoginAsync(dto);
+
+        result.Succeeded.Should().BeFalse();
+        result.Errors.Should().ContainSingle().Which.Should().Be("Login failed.");
+        _signInManagerMock.Verify(x => x.PasswordSignInAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task LoginAsync_ShouldReturnErrors_WhenUserIsLockedOut()
+    {
+        var dto = new LoginDto
+        {
+            Email = "test@test.com",
+            Password = "Password123!",
+            RememberMe = true
+        };
+
+        var appUser = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = dto.Email,
+            UserName = dto.Email
+        };
+
+        _userManagerMock.Setup(x => x.FindByEmailAsync(dto.Email))
+            .ReturnsAsync(appUser);
+
+        _signInManagerMock.Setup(x => x.PasswordSignInAsync(appUser, dto.Password, dto.RememberMe, true))
+            .ReturnsAsync(SignInResult.LockedOut);
+
+        var result = await _authService.LoginAsync(dto);
+
+        result.Succeeded.Should().BeFalse();
+        result.Errors.Should().ContainSingle().Which.Should().Be("Login failed.");
+    }
+
+    [Fact]
+    public async Task LoginAsync_ShouldReturnErrors_WhenUserIsNotAllowed()
+    {
+        var dto = new LoginDto
+        {
+            Email = "test@test.com",
+            Password = "Password123!",
+            RememberMe = true
+        };
+
+        var appUser = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = dto.Email,
+            UserName = dto.Email
+        };
+
+        _userManagerMock.Setup(x => x.FindByEmailAsync(dto.Email))
+            .ReturnsAsync(appUser);
+
+        _signInManagerMock.Setup(x => x.PasswordSignInAsync(appUser, dto.Password, dto.RememberMe, true))
+            .ReturnsAsync(SignInResult.NotAllowed);
+
+        var result = await _authService.LoginAsync(dto);
+
+        result.Succeeded.Should().BeFalse();
+        result.Errors.Should().ContainSingle().Which.Should().Be("Login failed.");
+    }
+
+    [Fact]
+    public async Task LoginAsync_ShouldReturnErrors_WhenPasswordIsInvalid()
+    {
+        var dto = new LoginDto
+        {
+            Email = "test@test.com",
+            Password = "wrong-password",
+            RememberMe = false
+        };
+
+        var appUser = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = dto.Email,
+            UserName = dto.Email
+        };
+
+        _userManagerMock.Setup(x => x.FindByEmailAsync(dto.Email))
+            .ReturnsAsync(appUser);
+
+        _signInManagerMock.Setup(x => x.PasswordSignInAsync(appUser, dto.Password, dto.RememberMe, true))
+            .ReturnsAsync(SignInResult.Failed);
+
+        var result = await _authService.LoginAsync(dto);
+
+        result.Succeeded.Should().BeFalse();
+        result.Errors.Should().ContainSingle().Which.Should().Be("Login failed.");
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task LoginAsync_ShouldPassRememberMeToPasswordSignIn(bool rememberMe)
+    {
+        var dto = new LoginDto
+        {
+            Email = "test@test.com",
+            Password = "Password123!",
+            RememberMe = rememberMe
+        };
+
+        var appUser = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            Email = dto.Email,
+            UserName = dto.Email
+        };
+
+        _userManagerMock
+            .Setup(x => x.FindByEmailAsync(dto.Email))
+            .ReturnsAsync(appUser);
+
+        _signInManagerMock
+            .Setup(x => x.PasswordSignInAsync(appUser, dto.Password, rememberMe, true))
+            .ReturnsAsync(SignInResult.Success);
+
+        var result = await _authService.LoginAsync(dto);
+
+        result.Succeeded.Should().BeTrue();
+        _signInManagerMock.Verify(
+            x => x.PasswordSignInAsync(appUser, dto.Password, rememberMe, true),
+            Times.Once);
+    }
 }

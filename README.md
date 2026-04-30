@@ -1,6 +1,6 @@
 # Smart Event Booking
 
-ASP.NET Core MVC application for event discovery and ticket booking.
+ASP.NET Core REST API and Angular application for event discovery and ticket booking.
 
 For product vision, scope, and contribution workflow, see `PROJECT_SCOPE.md`.
 
@@ -8,6 +8,8 @@ For product vision, scope, and contribution workflow, see `PROJECT_SCOPE.md`.
 
 - .NET SDK 10.0
 - SQL Server (local instance or Docker)
+- Node.js (v18 or later) and npm
+- Angular CLI (`npm install -g @angular/cli`)
 
 ## 1) Configure the database settings
 
@@ -49,7 +51,7 @@ dotnet ef database update --project src/SmartEventBooking.Infrastructure/SmartEv
 ## 4) Run the app
 
 ```bash
-dotnet run --project src/SmartEventBooking.Web/SmartEventBooking.Web.csproj --launch-profile https
+dotnet run --project src/api/SmartEventBooking.Web/SmartEventBooking.Web.csproj --launch-profile https
 ```
 
 Default URLs (development):
@@ -63,7 +65,17 @@ If you run without the `https` launch profile, you may see:
 
 Use `--launch-profile https` (shown above), or set `ASPNETCORE_URLS` to include an HTTPS URL.
 
-## 5) Verify connectivity
+## Run the Frontend (Development server)
+
+To start a local development server for the frontend, navigate to the client directory and run:
+
+```bash
+cd src/client
+npm install
+ng serve
+```
+
+## 6) Verify connectivity
 
 Health endpoint:
 

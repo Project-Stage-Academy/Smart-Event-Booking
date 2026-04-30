@@ -1,0 +1,15 @@
+<header class="app-header">
+  <nav class="app-nav">
+    <div>
+      <a routerLink="/events" routerLinkActive="active-link">Events</a>
+    </div>
+    <div>
+      @if (!authService.isLoggedIn()) {
+        <a routerLink="/login" routerLinkActive="active-link">Login</a>
+        <a routerLink="/register" routerLinkActive="active-link">Register</a>
+      } @else {
+        <span class="welcome-message">Welcome, {{ authService.userEmail() }}!</span>
+      }
+    </div>
+  </nav>
+</header>

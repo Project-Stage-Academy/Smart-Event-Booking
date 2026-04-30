@@ -25,17 +25,4 @@ public class HomeController : ControllerBase
     {
         return Ok(new { message = "Privacy Policy Content" });
     }
-
-    [HttpGet("error")]
-    public IActionResult Error()
-    {
-        var requestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
-        _logger.LogError("Error occurred. RequestId: {RequestId}", requestId);
-
-        return Problem(
-            detail: "An unexpected error occurred processing your request.",
-            title: "Internal Server Error",
-            instance: requestId
-        );
-    }
 }
