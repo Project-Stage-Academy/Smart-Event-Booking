@@ -417,5 +417,5 @@ FodyWeavers.xsd
 *.msm
 *.msp
 
-docker-compose.yml
-Dockerfile
+#docker-compose.yml
+#Dockerfile

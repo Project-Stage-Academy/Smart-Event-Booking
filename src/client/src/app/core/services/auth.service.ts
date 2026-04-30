@@ -1,7 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { ConfigService } from './config.service';
 import { LoginRequest, RegisterRequest, AuthResponse, AuthSession } from '../models/auth.model';
 
 @Injectable({
@@ -11,6 +11,7 @@ export class AuthService {
   private static readonly AUTH_SESSION_STORAGE_KEY = 'auth.session';
 
   private readonly http = inject(HttpClient);
+  private readonly config = inject(ConfigService);
   private readonly authSessionSignal = signal<AuthSession | null>(this.readStoredAuthSession());
 
   readonly authSession = computed(() => this.authSessionSignal());
@@ -22,9 +23,9 @@ export class AuthService {
     return this.roles().includes(role);
   }
 
-  private readonly authApiUrl = environment.apiUrl.endsWith('/events')
-    ? environment.apiUrl.replace('/events', '/auth')
-    : `${environment.apiUrl}/auth`;
+  private get authApiUrl(): string {
+    return `${this.config.apiBaseUrl}/api/auth`;
+  }
 
   register(request: RegisterRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.authApiUrl}/register`, request)

@@ -8,8 +8,12 @@
   </Folder>
   <Folder Name="/tests/">
     <File Path="src/SmartEventBooking.Web/.env" />
-    <Project Path="SmartEventBooking.Infrastructure.IntegrationTests/SmartEventBooking.Infrastructure.IntegrationTests.csproj" Id="ff0fdb7a-e2f2-4d11-8c5d-fee1440c01a1" />
-    <Project Path="SmartEventBooking.Infrastructure.UnitTests/SmartEventBooking.Infrastructure.UnitTests.csproj" Id="c87eafba-727f-4bc3-8384-ef0721e5d1a7" />
+    <Project Path="tests/SmartEventBooking.Infrastructure.IntegrationTests/SmartEventBooking.Infrastructure.IntegrationTests.csproj">
+      <Build Solution="Debug|*" Project="false" />
+    </Project>
+    <Project Path="tests/SmartEventBooking.Infrastructure.UnitTests/SmartEventBooking.Infrastructure.UnitTests.csproj">
+      <Build Solution="Debug|*" Project="false" />
+    </Project>
     <Project Path="tests/SmartEventBooking.Web.Tests/SmartEventBooking.Web.Tests.csproj" />
   </Folder>
 </Solution>

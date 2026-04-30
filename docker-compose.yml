@@ -1,0 +1,50 @@
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: smart-event-booking-sql-db
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${Database__Password}
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "${Database__Password}", "-Q", "SELECT 1", "-No"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  api:
+    image: smart-event-booking-api:latest
+    build:
+      context: .
+      dockerfile: src/api/SmartEventBooking.Web/Dockerfile
+    container_name: smart-event-booking-api-app
+    ports:
+      - "5270:8080"
+    env_file:
+      - .env
+    environment:
+      - Database__Server=db
+    depends_on:
+      db:
+        condition: service_healthy 
+
+  client:
+    image: smart-event-booking-client:latest
+    build:
+      context: ./src/client
+      dockerfile: Dockerfile
+    container_name: smart-event-booking-client-app
+    ports:
+      - "4200:80"
+    environment:
+      - API_BASE_URL=http://localhost:5270
+    depends_on:
+      - api
+
+volumes:
+  sql_data:
