@@ -2,33 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-
-export interface LoginRequest {
-  email: string;
-  password: string;
-  rememberMe: boolean;
-}
-
-export interface RegisterRequest {
-  email: string;
-  password: string;
-  confirmPassword: string;
-  firstName: string;
-  lastName?: string;
-}
-
-interface AuthResponse {
-  message: string;
-  roles?: string[];
-}
-
-export interface AuthSession {
-  email: string;
-  rememberMe: boolean;
-  message: string;
-  loggedInAt: string;
-  roles: string[];
-}
+import { LoginRequest, RegisterRequest, AuthResponse, AuthSession } from '../models/auth.model';
 
 @Injectable({
   providedIn: 'root'
@@ -41,8 +15,8 @@ export class AuthService {
 
   readonly authSession = computed(() => this.authSessionSignal());
   readonly userEmail = computed(() => this.authSessionSignal()?.email ?? null);
-  readonly isLoggedIn = computed(() => this.authSessionSignal() !== null);
   readonly roles = computed(() => this.authSessionSignal()?.roles ?? []);
+  readonly isLoggedIn = computed(() => this.authSessionSignal() !== null);
 
   hasRole(role: string): boolean {
     return this.roles().includes(role);
@@ -53,7 +27,16 @@ export class AuthService {
     : `${environment.apiUrl}/auth`;
 
   register(request: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.authApiUrl}/register`, request);
+    return this.http.post<AuthResponse>(`${this.authApiUrl}/register`, request)
+      .pipe(tap((response) => {
+        this.setAuthSession({
+          email: request.email,
+          rememberMe: false, // Default for registration
+          message: response.message,
+          loggedInAt: new Date().toISOString(),
+          roles: response.roles
+        });
+      }));
   }
 
   login(request: LoginRequest): Observable<AuthResponse> {
@@ -141,7 +124,8 @@ export class AuthService {
         parsed.email.trim().length === 0 ||
         typeof parsed.rememberMe !== 'boolean' ||
         typeof parsed.message !== 'string' ||
-        typeof parsed.loggedInAt !== 'string'
+        typeof parsed.loggedInAt !== 'string' ||
+        !Array.isArray(parsed.roles)
       ) {
         return null;
       }

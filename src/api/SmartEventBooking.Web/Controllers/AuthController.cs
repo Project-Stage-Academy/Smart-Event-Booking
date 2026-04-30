@@ -23,7 +23,11 @@ public class AuthController : ControllerBase
 
         if (result.Succeeded)
         {
-            return Ok(new { message = "Registration successful" });
+            return Ok(new 
+            { 
+                message = "Registration successful",
+                roles = result.Roles
+            });
         }
 
         return BadRequest(result.Errors);
@@ -48,7 +52,11 @@ public class AuthController : ControllerBase
 
         if (result.Succeeded)
         {
-            return Ok(new { message = "Login successful", roles = result.Roles });
+            return Ok(new
+            {
+                message = "Login successful",
+                roles = result.Roles
+            });
         }
 
         return BadRequest(result.Errors);

@@ -100,7 +100,11 @@ namespace SmartEventBooking.Infrastructure.Identity
                     throw;
                 }
 
-                return new AuthResultDto { Succeeded = true };
+                return new AuthResultDto 
+                { 
+                    Succeeded = true,
+                    Roles = new[] { RoleConstants.User }
+                };
             });
 
             if (result.Succeeded && createdUser is not null)
@@ -148,8 +152,11 @@ namespace SmartEventBooking.Infrastructure.Identity
             }
 
             var roles = await _userManager.GetRolesAsync(appUser);
-
-            return new AuthResultDto { Succeeded = true, Roles = roles };
+            return new AuthResultDto
+            {
+                Succeeded = true,
+                Roles = roles
+            };
         } 
 
         public async Task<AuthResultDto> LoginAsync(LoginDto dto)
