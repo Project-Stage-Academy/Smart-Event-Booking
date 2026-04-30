@@ -1,8 +1,6 @@
-﻿using SmartEventBooking.Domain.Enums;
-using System;
-using System.Collections.Generic;
+﻿using SmartEventBooking.Application.DTOs;
+using SmartEventBooking.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 
 namespace SmartEventBooking.Application.DTOs.UpdateEvent
 {
@@ -28,6 +26,8 @@ namespace SmartEventBooking.Application.DTOs.UpdateEvent
         [Range(0, double.MaxValue, ErrorMessage = "Price cannot be negative")]
         public decimal Price { get; set; }
         public string? Banner { get; set; }
+
+        public List<CategoryInputDto> Categories { get; set; } = new();
 
         [Required(ErrorMessage = "Status is required")]
 

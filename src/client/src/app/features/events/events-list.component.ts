@@ -8,6 +8,7 @@ import { Event } from '../../core/models/event.model';
 import { Category } from '../../core/models/category.model';
 import { EventSearchDto } from '../../core/models/event-search.model';
 import { Subscription } from 'rxjs';
+import { getCategoryBg, getCategoryTextColor } from '../../shared/utils/category-color.util';
 
 @Component({
   selector: 'app-events-list',
@@ -111,4 +112,7 @@ export class EventsListComponent implements OnInit, OnDestroy {
   getPages(): number[] {
     return Array.from({ length: this.totalPages }, (_, i) => i + 1);
   }
+
+  getCategoryBg = getCategoryBg;
+  getCategoryTextColor = getCategoryTextColor;
 }

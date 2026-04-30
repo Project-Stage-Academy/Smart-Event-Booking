@@ -29,6 +29,9 @@ public class EventRepository : IEventRepository
             .OrderBy(e => e.Id)
             .Skip(skip)
             .Take(take)
+            .Include(e => e.Venue)
+            .Include(e => e.EventCategories)
+                .ThenInclude(ec => ec.Category)
             .ToListAsync(cancellationToken);
     }
 

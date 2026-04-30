@@ -1,8 +1,9 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { EventService } from '../../../core/services/event.service';
-import { Event, EventStatus } from '../../../core/models/event.model';
+import { Event } from '../../../core/models/event.model';
+import { getCategoryBg, getCategoryTextColor } from '../../../shared/utils/category-color.util';
 
 @Component({
   selector: 'app-event-details',
@@ -13,7 +14,6 @@ import { Event, EventStatus } from '../../../core/models/event.model';
 })
 export class EventDetailsComponent implements OnInit {
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
   private eventService = inject(EventService);
 
   event = signal<Event | undefined>(undefined);
@@ -45,6 +45,9 @@ export class EventDetailsComponent implements OnInit {
       }
     });
   }
+
+  getCategoryBg = getCategoryBg;
+  getCategoryTextColor = getCategoryTextColor;
 
   onBookTicket(): void {
     // Note: Assuming there will be an auth service to check login later.
