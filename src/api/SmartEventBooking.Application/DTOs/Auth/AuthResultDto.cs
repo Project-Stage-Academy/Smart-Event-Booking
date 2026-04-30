@@ -6,6 +6,5 @@ namespace SmartEventBooking.Application.DTOs.Auth
         public bool Succeeded { get; set; }
         public IEnumerable<string> Roles { get; set; } = Array.Empty<string>();
         public IEnumerable<string> Errors { get; set; } = Array.Empty<string>();
-        public IEnumerable<string> Roles { get; set; } = Array.Empty<string>();
     }
 }
