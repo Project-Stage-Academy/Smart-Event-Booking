@@ -19,6 +19,7 @@ export interface RegisterRequest {
 
 interface AuthResponse {
   message: string;
+  roles?: string[];
 }
 
 export interface AuthSession {
@@ -26,6 +27,7 @@ export interface AuthSession {
   rememberMe: boolean;
   message: string;
   loggedInAt: string;
+  roles: string[];
 }
 
 @Injectable({
@@ -40,6 +42,11 @@ export class AuthService {
   readonly authSession = computed(() => this.authSessionSignal());
   readonly userEmail = computed(() => this.authSessionSignal()?.email ?? null);
   readonly isLoggedIn = computed(() => this.authSessionSignal() !== null);
+  readonly roles = computed(() => this.authSessionSignal()?.roles ?? []);
+
+  hasRole(role: string): boolean {
+    return this.roles().includes(role);
+  }
 
   private readonly authApiUrl = environment.apiUrl.endsWith('/events')
     ? environment.apiUrl.replace('/events', '/auth')
@@ -56,6 +63,7 @@ export class AuthService {
           email: request.email,
           rememberMe: request.rememberMe,
           message: response.message,
+          roles: response.roles ?? [],
           loggedInAt: new Date().toISOString()
         });
       }));
@@ -142,6 +150,12 @@ export class AuthService {
         email: parsed.email.trim(),
         rememberMe: parsed.rememberMe,
         message: parsed.message,
+        roles: Array.isArray(parsed.roles) 
+          ? parsed.roles
+              .filter((r): r is string => typeof r === 'string')
+              .map(r => r.trim())
+              .filter(r => r.length > 0) 
+          : [],
         loggedInAt: parsed.loggedInAt
       };
     } catch {

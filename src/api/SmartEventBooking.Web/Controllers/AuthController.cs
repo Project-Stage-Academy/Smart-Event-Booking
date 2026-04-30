@@ -48,7 +48,7 @@ public class AuthController : ControllerBase
 
         if (result.Succeeded)
         {
-            return Ok(new { message = "Login successful" });
+            return Ok(new { message = "Login successful", roles = result.Roles });
         }
 
         return BadRequest(result.Errors);
